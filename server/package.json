@@ -1,0 +1,45 @@
+{
+  "name": "ift-result-portal",
+  "version": "1.0.0",
+  "description": "an online portal for viewing and uploading of results for the department of information technology, federal university of technology, owerri",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [
+    "secure",
+    "result",
+    "school",
+    "portal"
+  ],
+  "author": "ift",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "nodemon": "^3.1.7"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "^11.0.0",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-async-errors": "^3.1.1",
+    "express-fileupload": "^1.5.1",
+    "express-rate-limit": "^7.4.1",
+    "fido2-lib": "^3.5.3",
+    "helmet": "^8.0.0",
+    "image-to-pdf": "^2.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.7.1",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
+    "pdf-merger-js": "^4.3.1",
+    "photo-to-pdf": "^1.0.1",
+    "winston": "^3.15.0"
+  }
+}
