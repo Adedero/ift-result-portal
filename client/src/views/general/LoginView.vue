@@ -15,7 +15,7 @@ const openPasskeyLogin = (open) => {
       severity: 'warn',
       summary: 'ID required',
       detail: 'You need to provide an ID first.',
-      life: 3000, 
+      life: 5000, 
     });
     return;
   }
