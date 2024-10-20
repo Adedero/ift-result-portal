@@ -34,8 +34,8 @@ const links = ref([
             <h1 class="font-semibold">
               {{ userStore.user?.firstName ?? '' }} {{ userStore.user?.lastName ?? '' }}
             </h1>
-            <p class="text-sm">Staff ID: {{ userStore.user?.regNumber ?? '' }}</p>
-            <p class="text-sm">Class: {{ userStore.user?.level ?? '' }}</p>
+            <p class="text-sm">{{ userStore.user?.regNumber ?? '' }}</p>
+            <p class="text-sm">Level: {{ userStore.user?.level ?? '' }}</p>
             <p class="text-xs uppercase text-red-500">SUDENT</p>
             <div v-if="!userStore.user.email" class="p-4">
               <VEmailNotifier />

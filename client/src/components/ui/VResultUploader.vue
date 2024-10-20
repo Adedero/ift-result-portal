@@ -6,11 +6,15 @@ import useFileUpload from "@/composables/use-file-upload";
 import sessions from '@/data/sessions';
 
 const emit = defineEmits(["upload"]);
-defineProps({
+const props = defineProps({
   courses: {
     type: Array,
     required: true,
     default:[]
+  },
+  uploader: {
+    type: String,
+    default: "staff"
   }
 })
 
@@ -28,7 +32,7 @@ const handleUpload = async (files) => {
   result.value.courseTitle = result.value.course.title;
   loading.value = true;
   error.value = null;
-  const { error: err, data } = await useFileUpload("staff/results", files, { router, toast, body: result.value });
+  const { error: err, data } = await useFileUpload(`${props.uploader}/result`, files, { router, toast, body: result.value });
   if (data.value) {
     emit("upload", data.value.result);
     visible.value = false;
@@ -46,7 +50,7 @@ const handleUpload = async (files) => {
     </slot>
 
     <Dialog v-model:visible="visible" modal header="Upload Result">
-      <div class="grid gap-3 md:w-96">
+      <div class="grid gap-3 md:w-80">
         <div class="grid gap-1">
           <label for="course" class="text-sm text-slate-500 font-medium">Course</label>
           <Select v-model="result.course" option-label="code" :options="courses" fluid input-id="course" />

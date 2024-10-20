@@ -12,29 +12,32 @@ const display = ref("grid");
 const routeName = "staff-result"
 
 const filteredResults = computed(() => {
-  if (data) {
-    return data.value.results.filter(result => {
-      return (
-        result.courseCode.toLowerCase().includes(search.value.toLowerCase()) ||
-        result.courseTitle.toLowerCase().includes(search.value.toLowerCase())
-      )
-    });
+  if (data.value) {
+    return data.value.results
+      .map(result => ({ ...result, courseCode: result.courseCode.split("-").join(" ") }))
+      .filter(result => (
+          result.courseCode.toLowerCase().includes(search.value.toLowerCase()) ||
+          result.courseTitle.toLowerCase().includes(search.value.toLowerCase())
+        )
+    );
   }
   return []
 });
 
 const formattedCourses = data.value.courses.map(course => ({ code: course.code.split("-").join(" "), title: course.title }));
 
-const handlResultUpload = (result) => {
-  data.value.results = data.value.results.filter(r => {
+const handleResultUpload = (result) => {
+  const filteredResults = data.value.results.filter(r => {
     return (
-      r.courseCode !== result.courseCode &&
-      r.semester !== result.semester &&
+      r.courseCode !== result.courseCode ||
+      r.semester !== result.semester ||
       r.session !== result.session
-    )
-  })
-  data.value.results.unshift(result);
-}
+    );
+  });
+
+  filteredResults.unshift(result);
+  data.value.results = filteredResults;
+};
 </script>
 
 <template>
@@ -53,7 +56,7 @@ const handlResultUpload = (result) => {
           :outlined="display !== 'grid'" />
         <Button @click="display = 'list'" size="small" icon="pi pi-list" severity="secondary"
           :outlined="display === 'grid'" />
-        <VResultUploader :courses="formattedCourses" @upload="handlResultUpload" />
+        <VResultUploader :courses="formattedCourses" @upload="handleResultUpload" />
       </div>
     </header>
 

@@ -39,6 +39,7 @@ module.exports = {
         title: user.title,
         username: user.username,
         email: user.email,
+        isEmailVerified: user.isEmailVerified,
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,

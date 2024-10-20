@@ -111,6 +111,8 @@ module.exports = {
         title: createdUser.title,
         firstName: createdUser.firstName,
         lastName: createdUser.lastName,
+        email: createdUser.email,
+        isEmailVerified: createdUser.isEmailVerified,
         role: createdUser.role,
         sex: createdUser.sex,
         username: createdUser.username,

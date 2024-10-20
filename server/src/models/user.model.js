@@ -27,6 +27,10 @@ module.exports = (mongoose) => {
       index: true,
       sparse: true
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false
+    },
     password: {
       type: String,
       required: true,

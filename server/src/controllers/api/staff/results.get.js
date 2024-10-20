@@ -9,7 +9,7 @@ module.exports = {
     }
     const [results, courses] = await Promise.all([
       db.Result.find({ staff: id }).lean(),
-      db.Course.find()
+      db.Course.find().lean()
     ])
     return res.status(200).json({ results, courses });
   }

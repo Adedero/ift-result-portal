@@ -16,10 +16,12 @@ const filteredResults = computed(() => {
     const filtered = {};
 
     for (const [session, resultsArray] of Object.entries(data.value.results)) {
-      const matchedResults = resultsArray.filter(result =>
-        result.courseCode.toLowerCase().includes(search.value.toLowerCase()) ||
-        result.courseTitle.toLowerCase().includes(search.value.toLowerCase())
-      );
+      const matchedResults = resultsArray
+        .map(result => ({ ...result, courseCode: result.courseCode.split("-").join(" ") }))
+        .filter(result =>
+          result.courseCode.toLowerCase().includes(search.value.toLowerCase()) ||
+          result.courseTitle.toLowerCase().includes(search.value.toLowerCase())
+        );
 
       if (matchedResults.length > 0) {
         filtered[session] = matchedResults;

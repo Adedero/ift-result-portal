@@ -43,10 +43,12 @@ const isUserValid = computed(() => props.user ? Object.keys(props.user).length >
         <p class="font-semibold">{{ user.firstName }} {{ user.lastName }}</p>
         <p>{{  user.email || user.username || user.staffId || user.regNumber }}</p>
       </div>
-      <Avatar v-if="user.picture" :image="user.image" :class :style :shape :size />
+      <div v-if="user.image" class="overflow-hidden rounded-full" :class :style>
+        <img :src="user.image" class="w-full h-full object-cover">
+      </div>
       <Avatar v-else :label="user.firstName.split('')[0]" :class :style :shape :size />
     </div>
-    <div v-else class="text-[--p-primary-500]">
+    <div v-else class="text-[--p-primary-500]" :class>
       <VIcon icon="user" :height :width />
     </div>
   </div>

@@ -8,6 +8,7 @@ const fileUpload = require("express-fileupload");
 const PORT = process.env.PORT;
 const asyncErrorHandler = require("./middleware/async-errors");
 const passport = require("./config/passport.config");
+const path = require("node:path");
 
 
 global.isInProductionEnv = process.env.NODE_ENV === "production";
@@ -16,7 +17,13 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CLIENT_URL }));
-app.use(express.static("public"));
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+});
+app.use(express.static(path.join(__dirname, "../public")));
+//app.use('/users', express.static(path.join(__dirname, '..public/users')));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(fileUpload({ createParentPath: true, limits: { fileSize: 10 * 1024 * 1024 } }));
