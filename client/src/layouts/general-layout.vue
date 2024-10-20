@@ -4,7 +4,7 @@ import futo_logo from "@/assets/futo-logo.svg";
 </script>
 <template>
   <main class="h-dvh w-full grid md:flex md:items-center md:justify-center">
-    <section class="w-full h-full p-5 md:max-w-96 lg:max-w-[28rem] xl:max-w-[30rem] lg:p-10 bg-gradient-to-b from-[--p-primary-200] to-white to-[60%]">
+    <section class="w-full h-full p-5 md:max-w-96 lg:max-w-[26rem] xl:max-w-[28rem] lg:p-10 bg-gradient-to-b from-[--p-primary-200] to-white to-[60%]">
       <header class="flex items-center gap-2 py-5">
         <img :src="futo_logo" alt="FUTO logo" width="40">
         <div class="text-[0.8rem]">

@@ -52,7 +52,7 @@ const login = async () => {
 <template>
   <div class="grid gap-5">
     <div>
-      <label for="id">ID</label>
+      <label for="id">ID <small class="text-slate-500 md:hidden">Username, email, staff ID, or Reg. Number</small></label>
       <InputText v-model="user.id" type="text" id="id" fluid placeholder="Username, Email, StaffId or Reg. Number" />
       <small></small>
     </div>

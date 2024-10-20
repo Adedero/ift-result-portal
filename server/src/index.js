@@ -22,7 +22,6 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static(path.join(__dirname, "../public")));
-//app.use('/users', express.static(path.join(__dirname, '..public/users')));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

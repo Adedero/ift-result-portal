@@ -10,6 +10,14 @@ const adminRoutes = [
     component: () => import("@/views/admin/ResultsView.vue"),
   },
   {
+    path: "result/:resultId",
+    name: "admin-result",
+    component: () => import("@/views/general/ResultView.vue"),
+    meta: {
+      userRole: "admin"
+    }
+  },
+  {
     path: "administrators",
     name: "admin-admins",
     component: () => import("@/views/admin/AdminsView.vue")

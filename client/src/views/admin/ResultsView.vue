@@ -26,11 +26,11 @@ const [
   useFetch("admin/result-count", { router, toast, cache: true })
 ])
 
-watch(page, (value) => {
+watch(page, async (value) => {
   data.value = await useFetch(`admin/results?page=${value}&limit=${LIMIT}`, { router, toast, cache: true }).data.value
 })
 const search = ref("");
-const routeName = "staff-result"
+const routeName = "admin-result"
 
 const filteredResults = computed(() => {
   if (data.value) {

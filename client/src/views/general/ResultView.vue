@@ -4,12 +4,14 @@ import { useRoute, useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import useFetch from "@/composables/fetch/use-fetch";
 import { VuePDF, usePDF } from '@tato30/vue-pdf'
+import { useConfirm } from "primevue/useconfirm";
 
 
 
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
+const confirm = useConfirm();
 
 const { error, data } = await useFetch(`${route.meta.userRole}/result/${route.params.resultId}`, { router, toast, cache: true });
 const { pdf, pages } = usePDF(data.value.result.url);
@@ -24,6 +26,39 @@ const handleScale = (value) => {
   if (value === -1) {
     scale.value = scale.value > 0.25 ? scale.value - 0.25 : scale.value
   }
+}
+
+const isDeleting = ref(false);
+const deleteResult = async () => {
+  isDeleting.value = true;
+  await useFetch(
+    `admin/delete-result`,
+    { method: "POST", router, toast, toastOnFailure: true, toastLife: 8000, body: { result: data.value.result } },
+    (payload) => {
+      if (payload.success) router.back()
+    }
+  )
+  isDeleting.value = false;
+}
+
+const confirmDelete = () => {
+  confirm.require({
+    message: `Are you sure you want to delete this result?`,
+    header: 'Confirmation',
+    icon: 'pi pi-exclamation-triangle',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Delete',
+      severity: 'danger'
+    },
+    accept: () => {
+      deleteResult()
+    }
+  })
 }
 </script>
 
@@ -49,8 +84,8 @@ const handleScale = (value) => {
           <a :href="data.result.url" :download="data.result.name">
             <Button size="small" label="Download" icon="pi pi-download" />
           </a>
-          <Button v-if="$route.meta.userRole === 'admin'" label="Delete" severity="danger" size="small"
-            icon="pi pi-trash" outlined />
+          <Button @click="confirmDelete()" v-if="$route.meta.userRole === 'admin'" label="Delete" severity="danger" size="small"
+            icon="pi pi-trash" outlined :loading="isDeleting" />
         </div>
       </header>
       <div class="h-[calc(100%-4rem)] w-full overflow-auto flex flex-col items-center gap-4">
