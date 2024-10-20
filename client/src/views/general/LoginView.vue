@@ -1,8 +1,11 @@
 <script setup>
 import { useToast } from 'primevue/usetoast';
-import { provide, ref } from 'vue';
-const toast = useToast();
+import { defineAsyncComponent, provide, ref } from 'vue';
 
+const PasskeyLogin = defineAsyncComponent({
+  loader: () => import("../../components/biometrics/PasskeyLogin.vue")
+})
+const toast = useToast();
 const user = ref({});
 provide("userIdAndPassword", user);
 
@@ -40,15 +43,27 @@ const openPasskeyLogin = (open) => {
     <div class="mt-5 grid gap-2">
       <p>Log in with:</p>
 
-      <PasskeyLogin>
-        <template #open-button="{ open }">
-          <Button @click="openPasskeyLogin(open)" label="Face ID or Fingerprint" outlined fluid>
-            <template #icon>
-              <VIcon icon="fingerprint" />
+      <Suspense>
+        <template #default>
+          <PasskeyLogin>
+            <template #open-button="{ open }">
+              <Button @click="openPasskeyLogin(open)" label="Face ID or Fingerprint" outlined fluid>
+                <template #icon>
+                  <VIcon icon="fingerprint" />
+                </template>
+              </Button>
             </template>
-          </Button>
+          </PasskeyLogin>
         </template>
-      </PasskeyLogin>
+
+        <template #fallback>
+          <div
+            class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-40 shadow bg-white rounded-md p-5 flex items-center justify-centers">
+            <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent"
+              animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+          </div>
+        </template>
+      </Suspense>
 
 
       <!-- <FaceId>
