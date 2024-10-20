@@ -9,7 +9,8 @@ const toast = useToast();
 const user = ref({});
 provide("userIdAndPassword", user);
 
-const openPasskeyLogin = (open) => {
+const visible = ref(false);
+const openPasskeyLogin = () => {
   if(!user.value.id) {
     toast.add({
       severity: 'warn',
@@ -19,7 +20,7 @@ const openPasskeyLogin = (open) => {
     });
     return;
   }
-  open();
+  visible.value = true;
 }
 </script>
 
@@ -43,27 +44,28 @@ const openPasskeyLogin = (open) => {
     <div class="mt-5 grid gap-2">
       <p>Log in with:</p>
 
-      <Suspense>
-        <template #default>
-          <PasskeyLogin>
-            <template #open-button="{ open }">
-              <Button @click="openPasskeyLogin(open)" label="Face ID or Fingerprint" outlined fluid>
-                <template #icon>
-                  <VIcon icon="fingerprint" />
-                </template>
-              </Button>
-            </template>
-          </PasskeyLogin>
+      <Button @click="openPasskeyLogin" label="Face ID or Fingerprint" outlined fluid>
+        <template #icon>
+          <VIcon icon="fingerprint" />
         </template>
+      </Button>
 
-        <template #fallback>
-          <div
-            class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-40 shadow bg-white rounded-md p-5 flex items-center justify-centers">
-            <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent"
-              animationDuration=".5s" aria-label="Custom ProgressSpinner" />
-          </div>
-        </template>
-      </Suspense>
+      <Dialog v-model:visible="visible" header="Biometric login" class="max-w-[26rem]">
+        <Suspense>
+          <template #default>
+            <PasskeyLogin v-if="visible" />
+          </template>
+
+          <template #fallback>
+            <div
+              class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-40 shadow bg-white rounded-md p-5 flex items-center justify-centers">
+              <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent"
+                animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+            </div>
+          </template>
+        </Suspense>
+      </Dialog>
+
 
 
       <!-- <FaceId>

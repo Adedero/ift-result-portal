@@ -1,13 +1,10 @@
 <script setup>
-import { inject, onMounted, ref } from "vue";
+import { inject, onMounted, ref, watch } from "vue";
 import useFetch from "../../composables/fetch/use-fetch";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import { startAuthentication } from "@simplewebauthn/browser";
 import useUserStore from "../../stores/user.store";
-
-const visible = ref(false);
-const open = () => visible.value = true;
 
 const router = useRouter();
 const toast = useToast();
@@ -82,34 +79,26 @@ onMounted(async () => {
 
 
 <template>
-  <div>
-    <slot name="open-button" :open>
-      <button @click="open" type="button">Open</button>
-    </slot>
-    <Dialog v-model:visible="visible" header="Biometric login" class="max-w-[26rem]">
-      <div class="w-full">
-        <div v-if="!isBiometricsSupportedByBrowser"
-          class="text-center border-2 border-red-400 rounded-md p-3 bg-red-50">
-          <header class="flex flex-col items-center justify-center">
-            <span class="pi pi pi-times-circle text-red-500" style="font-size: 1.5rem"></span>
-            <span class="text-lg font-medium text-red-500"> Your browser does not support biometrics.</span>
-          </header>
-          <p class="ml-5 text-red-400">
-            We recommend Firefox or Google Chrome for optimal performance. Switch to a different browswer and try again.
-          </p>
-        </div>
+  <div class="w-full">
+    <div v-if="!isBiometricsSupportedByBrowser" class="text-center border-2 border-red-400 rounded-md p-3 bg-red-50">
+      <header class="flex flex-col items-center justify-center">
+        <span class="pi pi pi-times-circle text-red-500" style="font-size: 1.5rem"></span>
+        <span class="text-lg font-medium text-red-500"> Your browser does not support biometrics.</span>
+      </header>
+      <p class="ml-5 text-red-400">
+        We recommend Firefox or Google Chrome for optimal performance. Switch to a different browswer and try again.
+      </p>
+    </div>
 
-        <div v-else-if="!isBiometricsSupportedByDevice"
-          class="text-center border-2 border-red-400 rounded-md p-3 bg-red-50">
-          <header class="flex flex-col items-center justify-center">
-            <span class="pi pi pi-times-circle text-red-500" style="font-size: 1.5rem"></span>
-            <span class="text-lg font-medium text-red-500"> Your device does not support biometrics.</span>
-          </header>
-          <p class="ml-5 text-red-400">
-            Sorry! You cannot use face ID or fingerprint for verification on this device.
-          </p>
-        </div>
-      </div>
-    </Dialog>
+    <div v-else-if="!isBiometricsSupportedByDevice"
+      class="text-center border-2 border-red-400 rounded-md p-3 bg-red-50">
+      <header class="flex flex-col items-center justify-center">
+        <span class="pi pi pi-times-circle text-red-500" style="font-size: 1.5rem"></span>
+        <span class="text-lg font-medium text-red-500"> Your device does not support biometrics.</span>
+      </header>
+      <p class="ml-5 text-red-400">
+        Sorry! You cannot use face ID or fingerprint for verification on this device.
+      </p>
+    </div>
   </div>
 </template>
