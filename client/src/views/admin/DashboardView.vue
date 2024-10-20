@@ -8,7 +8,7 @@ import { useLocaleDate } from "@/composables/use-formats"
 const router = useRouter();
 const toast = useToast();
 
-const { data, error } = await useFetch("admin/dashboard", { router, toast, cache: true });
+const { cache: data, error } = await useFetch("admin/dashboard", { router, toast, cache: true });
 </script>
 
 <template>

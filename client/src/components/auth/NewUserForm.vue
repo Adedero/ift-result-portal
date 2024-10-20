@@ -26,6 +26,9 @@ const isDisabled = computed(() => {
   if (props.pin.role === "STAFF") {
     return (isCommonFieldsInvalid || !user.value.studentClass || !user.value.staffId)
   }
+  if (props.pin.role === "ADMIN") {
+    return (isCommonFieldsInvalid || !user.value.username)
+  }
   return isCommonFieldsInvalid;
 });
 
@@ -138,7 +141,7 @@ const goToDashboard = () => {
             <div class="grid md:grid-cols-2 gap-4">
               <div v-if="pin.role === 'STAFF' || pin.role === 'ADMIN'" class="grid">
                 <label for="title" class="text-sm text-slate-600 font-medium">Title</label>
-                <Select v-model="user.title" :options="titles" fluid input-id="sex" />
+                <Select v-model="user.title" :options="titles" fluid input-id="title" />
               </div>
 
               <div class="grid">
@@ -156,12 +159,12 @@ const goToDashboard = () => {
                 <InputNumber v-model.trim="user.regNumber" input-id="reg-number" :useGrouping="false" fluid />
               </div>
 
-              <div v-if="pin.role === 'STAFF'" class="grid">
+              <div v-if="pin.role !== 'STUDENT'" class="grid">
                 <label for="staff-id" class="text-sm text-slate-600 font-medium">Staff ID</label>
                 <InputText v-model.trim="user.staffId" id="staff-id" type="text" fluid />
               </div>
 
-              <div v-if="pin.role === 'ADMIN'" class="grid">
+              <div v-if="pin.role !== 'STUDENT'" class="grid">
                 <label for="username" class="text-sm text-slate-600 font-medium">Username</label>
                 <InputText v-model.trim="user.username" id="username" type="text" fluid />
               </div>
@@ -176,7 +179,7 @@ const goToDashboard = () => {
                 <Select v-model="user.level" :options="[100, 200, 300, 400, 500, 600, 700]" fluid input-id="level" />
               </div>
 
-              <div v-if="pin.role === 'STAFF'" class="grid">
+              <div v-if="pin.role !== 'STUDENT'" class="grid">
                 <label for="student-class" class="text-sm text-slate-600 font-medium">Student class</label>
                 <Select v-model="user.studentClass" :options="classes" fluid input-id="student-class" />
               </div>
@@ -190,7 +193,7 @@ const goToDashboard = () => {
             <div class="grid p-2">
               <div class="grid w-72">
                 <label for="password" class="text-sm text-slate-600 font-medium">Password</label>
-                <Password @input="checkPasswordLength" v-model.trim="user.password" id="password" fluid />
+                <Password @input="checkPasswordLength" v-model.trim="user.password" input-id="password" fluid />
                 <small v-show="isPasswordTooShort" class="mt-2 text-red-500">Your password must contain at least 8
                   characters.</small>
               </div>

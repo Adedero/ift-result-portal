@@ -1,3 +1,6 @@
+const db = require("../../../database/db");
+const bcrypt = require("bcrypt");
+
 module.exports = {
   fn: async (req, res) => {
     /* const { role } = req.query;
@@ -19,6 +22,9 @@ module.exports = {
       user[key] = typeof user[key] === "string" ? user[key].trim() : user[key]
     });
 
+    if (!user.email) delete user.email;
+    if (!user.username) delete user.username;
+
     if (user.password.length < 8) {
       return res.status(400).json({
         success: false,
@@ -28,23 +34,22 @@ module.exports = {
     }
 
     const { email, staffId, regNumber, username } = user;
-    const query = {
-      $or: [
-        { email: email ?? "" },
-        { staffId: staffId ?? "" },
-        { regNumber: regNumber ?? "" },
-        { username: username ?? "" }
-      ]
-    }
 
-    const existingUser = await db.User.findOne(query, { email: 1, staffId: 1, regNumber: 1, username: 1 }).lean();
+    const query = [];
+
+    if (email) query.push({ email });
+    if (staffId) query.push({ staffId });
+    if (regNumber) query.push({ regNumber });
+    if (username) query.push({ username });
+
+    const existingUser = await db.User.findOne({ $or: query }, { email: 1, staffId: 1, regNumber: 1, username: 1 }).lean();
     if (existingUser) {
       let info = "Duplicate user";
       let message;
       const duplicateFields = Object.keys(existingUser).filter(key => existingUser[key] === user[key]);
 
-      const duplicateFieldNames = duplicateFields.join(", ");
-      message = `Users with this ${duplicateFieldNames} already exist.`;
+      const duplicateFieldNames = duplicateFields.join(", or ");
+      message = `${duplicateFieldNames.length === 1 ? 'Users' : 'A user'} with this ${duplicateFieldNames} already exist.`;
 
       return res.status(400).json({
         success: false,
@@ -64,7 +69,7 @@ module.exports = {
     return res.status(200).json({
       success: true,
       info: "Done.",
-      message: `User successfully created.`,
+      message: `User added successfully.`,
       user: newUser
     })
   }

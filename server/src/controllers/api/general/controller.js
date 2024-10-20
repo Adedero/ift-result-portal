@@ -5,6 +5,7 @@ const path = require("node:path");
 const fs = require("fs");
 const imgToPDF = require("image-to-pdf");
 const PDFMerger = require("pdf-merger-js");
+const logger = require("../../../config/winston.config");
 
 const GeneralController = {
   getResult: async (req, res) => {
@@ -245,19 +246,23 @@ const GeneralController = {
     const filePath = path.join(uploadDir, fileName);
     const url = `${req.protocol}://${req.get("host")}/users/${user.role.toLowerCase().trim()}s/${fileName}`;
 
-    const existingImage = fs
-      .readdirSync(uploadDir)
-      .find((f) => f === fileName);
-
-    if (existingImage) {
-      fs.unlinkSync(path.join(uploadDir, existingImage));
+    if (user.image) {
+      fs.unlink(path.join(uploadDir, user.image.split("/").pop()), (err) => {
+        if (err) {
+          logger.info({
+            message: "Error deleting user image",
+            error: err.message,
+            id: user._id,
+            name: `${user.firstName} ${user.lastName}`,
+            timeStamp: Date.now()
+          });
+        }
+      });
     }
-
     await Promise.all([
       file.mv(filePath),
       db.User.updateOne({ _id: id }, { $set: { image: url } }),
     ]);
-
     return res.status(200).json({ image: url });
   },
 
@@ -415,28 +420,45 @@ const GeneralController = {
       });
     }
 
-    const { username, email } = profile;
+    let { username, email } = profile;
 
-    const [existingUserWithUsername, existingUserWithEmail] = await Promise.all([
-      db.User.findOne({ username : username ?? "", _id: { $ne: id } }),
-      db.User.findOne({ email: email ?? "", _id: { $ne: id } })
-    ]);
+    // Set empty strings to null to avoid saving them in the database
+    username = username?.trim() === "" ? null : username;
+    email = email?.trim() === "" ? null : email;
 
-    if (existingUserWithUsername) {
-      return res.status(400).json({
-        info: "Failed",
-        message: "This username is already in use."
-      });
+    const query = [];
+    if (username) {
+      query.push(db.User.findOne({ username, _id: { $ne: id } }));
+    }
+    if (email) {
+      query.push(db.User.findOne({ email, _id: { $ne: id } }));
     }
 
-    if (existingUserWithEmail) {
-      return res.status(400).json({
-        info: "Failed",
-        message: "This email is already in use."
-      });
+    if (query.length > 0) {
+      const results = await Promise.all(query);
+      const [existingUserWithUsername, existingUserWithEmail] = results;
+
+      if (existingUserWithUsername) {
+        return res.status(400).json({
+          info: "Failed",
+          message: "This username is already in use."
+        });
+      }
+
+      if (existingUserWithEmail) {
+        return res.status(400).json({
+          info: "Failed",
+          message: "This email is already in use."
+        });
+      }
     }
 
-    await db.User.updateOne({ _id: id }, { username, email });
+    // Update the user while omitting empty strings
+    const updateData = {};
+    if (username !== null) updateData.username = username;
+    if (email !== null) updateData.email = email;
+
+    await db.User.updateOne({ _id: id }, updateData);
 
     return res.status(200).json({
       user: { username, email },

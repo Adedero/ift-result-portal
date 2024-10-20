@@ -1,5 +1,3 @@
 <template>
-  <section>
-    The fucking dashboard
-  </section>
+  <UserManager user-role="STUDENT" />
 </template>

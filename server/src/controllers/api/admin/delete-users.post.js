@@ -13,20 +13,23 @@ module.exports = {
 
     for (i = 0; i < total; i++) {
       if (users[i].image) {
-        const imgDir = path.resolve(`public/users/${role.trim()}s`);
+        const imgDir = path.resolve(`public/users/${role.toLowerCase().trim()}s`);
         const fileName = users[i].image.split("/").pop();
         fs.unlink(path.join(imgDir, fileName), (err) => {
           if (err) {
             logger.info({
               message: `Error deleting image for user ${users[i].name}: ${err.message}`,
               timeStamp: Date.now()
-            })
+            });
           }
-        })
+        });
       }
     }
 
-    await db.User.deleteMany({ _id: { $in: userIds } });
+    await Promise.all([
+      db.User.deleteMany({ role : role.trim().toUpperCase(), _id: { $in: userIds } }),
+      db.Result.updateMany({ staff: { $in: userIds } }, { staff: req.user.id })
+    ])
     return res.status(200).json({ success: true, info: "Done", message: "Users deleted" });
   }
 }

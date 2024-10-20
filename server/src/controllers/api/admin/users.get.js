@@ -13,7 +13,13 @@ module.exports = {
     limit = parseInt(limit) || 50;
     const skip = page * limit;
 
-    const users = await db.User.find({ role }).skip(skip).limit(limit).lean();
+    const users = await db.User.find(
+      { role },
+      { password: 0, passkeys: 0, options: 0 }
+    )
+      .skip(skip)
+      .limit(limit)
+      .lean();
     return res.status(200).json(users);
   }
 }

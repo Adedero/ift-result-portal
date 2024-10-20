@@ -90,11 +90,10 @@ const deleteResults = async () => {
     "admin/delete-results",
     { method: "POST", router, toast, toastOnFailure: true, toastLife: 8000, body: selectedResults.value },
     (payload) => {
-      const removedResultsIds = selectedResults.value.map(result => result._id);
-      if (payload.results) {
+      if (payload.success) {
+        const removedResultsIds = selectedResults.value.map(result => result._id);
         data.value.results = [
           ...data.value.results.filter(result => !removedResultsIds.includes(result._id)),
-          ...payload.results
         ];
       }
     }
@@ -155,7 +154,7 @@ const upperBound = computed(() => Math.min((page.value + 1) * LIMIT, count.value
         <Button @click="page--" text severity="secondary" size="small" rounded icon="pi pi-chevron-left" :disabled="page < 1" />
         <span class="text-sm">{{ lowerBound }} - {{ upperBound }} of {{ count.count }}</span>
         <Button @click="page++" text severity="secondary" size="small" rounded icon="pi pi-chevron-right"
-          :disabled="page + 1 === totalPages" />
+          :disabled="page + 1 >= totalPages" />
       </div>
 
       <VResultUploader uploader="admin" :courses="formattedCourses" @upload="handleResultUpload" />
@@ -199,7 +198,7 @@ const upperBound = computed(() => Math.min((page.value + 1) * LIMIT, count.value
                 </td>
                 <td>{{ result.courseTitle }}</td>
                 <td @click="$router.push({ name: routeName, params: { resultId: result._id } })">
-                  {{ useLocaleDate(result.createdAt, { format: "dd-MM-yyyy", separator: "-", useAbbreviations: true })
+                  {{ useLocaleDate(result.createdAt, { format: "dd-MM-yyyy", separator: "/", useAbbreviations: true })
                   }}
                 </td>
               </tr>

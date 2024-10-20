@@ -24,8 +24,6 @@ module.exports = {
     }
 
     await db.Result.deleteMany({ _id: { $in: resultIds } });
-    const addedResults = await db.Result.find().limit(total);
-
-    return res.status(200).json({ results: addedResults });
+    return res.status(200).json({ success: true, info: "Done", message: "Results deleted." });
   }
 }
