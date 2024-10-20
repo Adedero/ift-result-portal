@@ -151,7 +151,8 @@ const upperBound = computed(() => Math.min((page.value + 1) * LIMIT, count.value
       </div>
 
       <div>
-        <Button @click="page--" text severity="secondary" size="small" rounded icon="pi pi-chevron-left" :disabled="page < 1" />
+        <Button @click="page--" text severity="secondary" size="small" rounded icon="pi pi-chevron-left"
+          :disabled="page < 1" />
         <span class="text-sm">{{ lowerBound }} - {{ upperBound }} of {{ count.count }}</span>
         <Button @click="page++" text severity="secondary" size="small" rounded icon="pi pi-chevron-right"
           :disabled="page + 1 >= totalPages" />
@@ -162,7 +163,7 @@ const upperBound = computed(() => Math.min((page.value + 1) * LIMIT, count.value
 
     <div class="max-h-[calc(100%-4rem)] overflow-y-auto">
       <section v-if="error" class="h-72 px-2 pb-5 md:px-5 grid w-full place-content-center">
-        <ServerError />
+        <ServerError :error reloadOnRetry />
       </section>
 
       <section v-else-if="data" class="h-full px-2 pb-5 md:px-5 grid gap-4">

@@ -18,7 +18,7 @@ const { cache: data, error } = await useFetch("admin/dashboard", { router, toast
     </header>
 
     <section v-if="error" class="h-72 px-2 pb-5 md:px-5 grid w-full place-content-center">
-      <ServerError reloadOnRetry />
+      <ServerError :error reloadOnRetry />
     </section>
 
     <section v-else-if="data" class="px-2 pb-5 md:px-5 grid gap-4">

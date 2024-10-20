@@ -15,6 +15,8 @@ const toast = useToast();
 const visible = ref(false);
 const pinGenerator = usePinGenerator();
 
+const emit = defineEmits(["generate-pin"])
+
 const users = [
   { name: "Administrator", role: "ADMIN" },
   { name: "Staff", role: "STAFF" },
@@ -33,6 +35,7 @@ const generatePin = async () => {
   );
   if (payload) {
     data.value = payload;
+    emit("generate-pin", payload.pins)
     visible.value = true;
   };
   loading.value = false;

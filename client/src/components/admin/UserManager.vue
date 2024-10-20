@@ -4,6 +4,7 @@ import useFetch from '../../composables/fetch/use-fetch';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import useUserStore from '../../stores/user.store';
 
 const props = defineProps({
   userRole: { type: String, default: "STUDENT" }
@@ -12,6 +13,7 @@ const props = defineProps({
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm();
+const userStore = useUserStore();
 
 const loading = ref(false);
 const error = ref(null);
@@ -26,7 +28,11 @@ const getUsers = async (role, pageNumber) => {
   const { error: err } = await useFetch(`admin/users/${role}?page=${pageNumber}&limit=${LIMIT}`,
     { router, toast, cache: true },
     (payload) => {
-      users.value = payload;
+      if (props.userRole === "ADMIN") {
+        users.value = payload.filter(user => user._id !== userStore.user.id) 
+      } else {
+        users.value = payload;
+      }
     }
   )
   loading.value = false;
@@ -201,7 +207,7 @@ onMounted(async () => {
             {{ selectedUsers.length ? `${selectedUsers.length}/` : "" }}{{ filteredUsers.length }}
           </p>
           <p class="font-semibold">
-            {{ `${userRole[0]}${userRole.toLowerCase().slice(1, userRole.length)}${users ? users.length === 1 ? '' : 's'
+            {{ `${userRole === 'ADMIN' ? 'Other ': ''}${userRole[0]}${userRole.toLowerCase().slice(1, userRole.length)}${users ? users.length === 1 ? '' : 's'
             : ''}` }}
           </p>
         </div>
