@@ -11,7 +11,8 @@ db.connectDB = async () => {
   try {
     await mongoose.connect(MONGODB_URI);
     initializeModels();
-    if (!global.isInProductionEnv) console.log("MongoDB connected successfully");
+    console.log("MongoDB connected successfully");
+    //if (!global.isInProductionEnv) console.log("MongoDB connected successfully");
   } catch (err) {
     if (global.isInProductionEnv) {
       logger.error({
