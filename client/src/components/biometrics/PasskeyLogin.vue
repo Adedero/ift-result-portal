@@ -37,7 +37,7 @@ const login = async () => {
   }
   await useFetch(
     `auth/web-authn-verify/${data.value.user.id}`,
-    { method: "POST", router, toast, body: { webAuthnJSON } },
+    { method: "POST", router, toast, toastOnSuccess: true, body: { webAuthnJSON } },
     (payload) => {
       if (payload.verified) {
         const loggedInUser = payload.user;
