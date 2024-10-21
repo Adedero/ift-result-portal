@@ -63,7 +63,7 @@ const openPasskeyLogin = () => {
 
           <template #fallback>
             <div
-              class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-40 shadow bg-white rounded-md p-5 flex items-center justify-centers">
+              class="w-full h-40 shadow bg-white rounded-md p-5 flex items-center justify-centers">
               <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent"
                 animationDuration=".5s" aria-label="Custom ProgressSpinner" />
             </div>
