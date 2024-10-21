@@ -44,7 +44,7 @@ const openPasskeyLogin = () => {
     <div class="mt-5 grid gap-2">
       <p>Log in with:</p>
 
-      <Button @click="openPasskeyLogin" label="Face ID or Fingerprint" outlined fluid>
+      <Button @click="openPasskeyLogin" label="Passkey or Biometrics" outlined fluid>
         <template #icon>
           <VIcon icon="fingerprint" />
         </template>

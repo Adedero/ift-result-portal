@@ -58,6 +58,7 @@ module.exports = {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
       return res.status(200).json({
         verified: verification.verified,
+        info: "Logged in",
         user: {
           id: user._id,
           title: user.title,

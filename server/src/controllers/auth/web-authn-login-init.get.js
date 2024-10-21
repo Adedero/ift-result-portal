@@ -44,6 +44,7 @@ module.exports = {
     await user.save();
 
     return res.json({
+      info: "Logging in",
       options,
       user: {
         id: user._id,
