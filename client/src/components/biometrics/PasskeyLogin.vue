@@ -22,7 +22,7 @@ const login = async () => {
   error.value = null;
   const { data, error: err } = await useFetch(
     `auth/web-authn-login-init/${userLoggingIn.value.id}`,
-    { router, toast, useBaseUrl: true, sendToken: false, toastOnFailure: true, toastLife: 8000 }
+    { router, toast, useBaseUrl: true, sendToken: false, toastOnSuccess: true, toastOnFailure: true, toastLife: 8000 }
   );
   error.value = err.value;
   if (!data.value) {
