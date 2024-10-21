@@ -169,6 +169,7 @@ async function retry() {
   error.value = null;
   await loadModels();
   await startVideoStream();
+  await handleVideoPlay()
 }
 
 onMounted(async () => {
