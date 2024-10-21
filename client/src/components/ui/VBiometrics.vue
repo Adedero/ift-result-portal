@@ -5,19 +5,84 @@ import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
 import biometrics from "@/assets/biometrics.svg";
 import useUserStore from '../../stores/user.store';
+import { startRegistration } from '@simplewebauthn/browser';
 
-const props = defineProps({ role: { type: String, default: "student" } });
+const props = defineProps({ role: { type: String, default: "${props.role}" } });
 const router = useRouter();
 const toast = useToast();
 const userStore = useUserStore();
+
+const isBiometricsSupportedByBrowser = ref(false);
+const isBiometricsSupportedByDevice = ref(false);
 
 const loading = ref(false);
 const error = ref(null);
 const data = ref(null);
 
-//Register descriptor
-//Change Descriptor: register new
-//Delete descriptor
+const getAuthnPasskeys = async () => {
+  loading.value = true;
+  error.value = null;
+  const { error: err } = await useFetch(
+    `${props.role}/web-authn-passkeys/${userStore.user.id}`,
+    { router, toast },
+    (payload) => {
+      if (payload && payload.passkeys) {
+        data.value = {
+          passkeys: payload.passkeys
+        }
+      }
+    }
+  );
+  loading.value = false;
+  error.value = err.value;
+}
+
+const isRegistering = ref(false);
+const regError = ref(null);
+const registerBiometrics = async () => {
+  isRegistering.value = true;
+  regError.value = null;
+  const { data: optionsData, error: err } = await useFetch(
+    `${props.role}/web-authn-register/${userStore.user.id}`,
+    { method: "POST", router, toast }
+  );
+
+  if (optionsData.value) {
+    const { options } = optionsData.value;
+    const webAuthnJSON = await startRegistration({ optionsJSON: options });
+    if (!webAuthnJSON) {
+      isRegistering.value = false;
+      regError.value = "Failed to register biometrics. Your device may not support this feature."
+    }
+    const { error: e } = await useFetch(
+      `${props.role}/web-authn-save/${userStore.user.id}`,
+      { method: "POST", router, toast, body: { webAuthnJSON } },
+      (payload) => {
+        toast.add({ severity: payload.verified ? 'success' : 'warning', summary: payload.info, detail: payload.message });
+        
+        isRegistering.value = false;
+        regError.value = e.value;
+        return;
+      }
+    );
+  }
+  isRegistering.value = false;
+  regError.value = err.value;
+}
+
+onMounted(async () => {
+  if (window.PublicKeyCredential) {
+    isBiometricsSupportedByBrowser.value = true;
+    const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+    isBiometricsSupportedByDevice.value = available;
+    if (available) {
+      await getAuthnPasskeys();
+    } 
+  } else {
+    isBiometricsSupportedByBrowser.value = false;
+    return;
+  }
+});
 </script>
 
 <template>

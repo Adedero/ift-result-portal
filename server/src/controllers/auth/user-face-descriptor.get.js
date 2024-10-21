@@ -24,7 +24,7 @@ module.exports = {
       info: "User Not found",
       message: 'Check the username, email, registration number or staff ID provided'
     });
-    const { faceDescriptor } = user;
+    const { _id, faceDescriptor } = user;
 
     if (!faceDescriptor || faceDescriptor.descriptor) {
       return res.status(400).json({
@@ -33,6 +33,6 @@ module.exports = {
       });
     }
       
-    return res.status(200).json({ faceDescriptor });
+    return res.status(200).json({ id: _id, faceDescriptor });
   }
 }

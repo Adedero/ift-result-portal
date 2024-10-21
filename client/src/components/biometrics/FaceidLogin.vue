@@ -19,6 +19,7 @@ const userLoggingIn = inject("userIdAndPassword");
 const loading = reactive({});
 const error = reactive({});
 const faceDesciptor = ref(null);
+const userId = ref(null);
 
 const getUserFaceDescriptor = async () => {
   loading.loadingFaceDescriptor = true;
@@ -28,6 +29,7 @@ const getUserFaceDescriptor = async () => {
     { router, toast, useBaseUrl: true, sendToken: false, toastOnSuccess: true, toastLife: 8000 },
     (payload) => {
       faceDesciptor.value = payload.faceDesciptor;
+      userId.value = payload.id
     }
   );
   error.loadingFaceDescriptor = err.value;
@@ -35,10 +37,20 @@ const getUserFaceDescriptor = async () => {
 }
 
 const login = async (verified) => {
+  if (!verified) {
+    toast.add({
+      severity: "warn",
+      summary: "Login failed",
+      detail: "Face verification was unsuccessful. Please try again.",
+      life: 5000,
+    });
+    return;
+  }
   loading.loggingIn = true;
   error.loggingIn = null;
+
   const { error: err } = await useFetch(
-    `auth/face-id-login/${userLoggingIn.value.id}`,
+    `auth/face-id-login/${userId}`,
     { router, toast, useBaseUrl: true, sendToken: false, toastOnSuccess: true, toastOnFailure: true, toastLife: 8000 },
     (payload) => {
       const loggedInUser = payload.user;
@@ -81,7 +93,7 @@ onMounted(async () => {
       <p class="font-medium text-slate-500 text-center">Please, wait...</p>
     </div>
 
-    <div v-else-if="!error.loadingFaceDescriptor"
+    <div v-else-if="error.loadingFaceDescriptor"
       class="text-center border-2 flex flex-col items-center justify-center p-3 border-red-400 rounded-md bg-red-50">
       <header class="flex flex-col items-center justify-center">
         <span class="pi pi pi-times-circle text-red-500" style="font-size: 1.5rem"></span>
@@ -96,13 +108,13 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-else-if="!faceDesciptor">
+    <div v-else-if="faceDesciptor">
       <Suspense>
         <template #default>
           <FaceDetector action="capture" :storedFaceDescriptor="faceDesciptor" @verify="login" />
         </template>
         <template #fallback>
-          <div class="w-full h-full gap-2 flex flex-col items-center justify-center">
+          <div class="w-full h-60 gap-2 flex flex-col items-center justify-center">
             <div class="loader"></div>
           </div>
         </template>

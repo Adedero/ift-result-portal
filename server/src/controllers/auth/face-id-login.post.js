@@ -1,32 +1,22 @@
-require("dotenv").config();
-const db = require("../../database/db");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-
 module.exports = {
+  params: ["id"],
   fn: async (req, res) => {
-    const { id, password } = req.body;
+    const { id } = req.params;
 
-    const user = await db.User.findOne({
-      $or: [
-        { username: id },
-        { staffId: id },
-        { regNumber: id }
-      ]
-    });
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        info: "Authentication failed.",
+        message: "Try again or log in with your password instead."
+      });
+    }
+
+    const user = await db.User.findById(id).lean();
     if (!user) {
       return res.status(400).json({
         success: false,
         info: "Authentication failed.",
-        message: 'Invalid email. Check your email and try again.',
-      });
-    }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        info: "Login failed.",
-        message: "Wrong password."
+        message: 'Try again or log in with your password instead.',
       });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -52,6 +42,6 @@ module.exports = {
         token: token,
         faceDescriptor: user.faceDescriptor
       }
-    })
+    });
   }
 }

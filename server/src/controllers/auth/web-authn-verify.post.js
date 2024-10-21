@@ -74,7 +74,8 @@ module.exports = {
           sex: user.sex,
           image: user.image,
           level: user.level,
-          token: token
+          token: token,
+          faceDescriptor: user.faceDescriptor
         }
       });
     }
