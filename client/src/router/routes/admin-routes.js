@@ -38,6 +38,11 @@ const adminRoutes = [
     component: () => import("@/views/admin/PinsView.vue")
   },
   {
+    path: "biometrics",
+    name: "admin-biometrics",
+    component: () => import("@/views/admin/BiometricsView.vue")
+  },
+  {
     path: "profile",
     name: "admin-profile",
     component: () => import("@/views/admin/ProfileView.vue")

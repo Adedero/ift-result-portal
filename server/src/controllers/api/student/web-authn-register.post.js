@@ -27,6 +27,7 @@ module.exports = {
       rpID: process.env.RP_ID,
       rpName: process.env.RP_NAME,
       userName: `${user.firstName} ${user.lastName}`,
+      userID: userId,
       excludeCredentials: user.passkeys.map(passkey => ({
         id: passkey.id,
         type: "public-key",

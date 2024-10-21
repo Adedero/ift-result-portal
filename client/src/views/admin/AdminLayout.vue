@@ -26,7 +26,8 @@ const links = ref([
     heading: "Settings",
     items: [
       { id: 1, title: "PINs", icon: "pi pi-key", name: "admin-pins", params: {} },
-      { id: 2, title: "Profile", icon: "pi pi-user", name: "admin-profile", params: {} },
+      { id: 2, title: "Biometrics", icon: "pi pi-eye", name: "admin-biometrics", params: {} },
+      { id: 3, title: "Profile", icon: "pi pi-user", name: "admin-profile", params: {} },
     ]
   }
 ])
@@ -35,7 +36,7 @@ const links = ref([
 <template>
   <AppLayout>
     <template #navbar="{ closeNavbar }">
-      <div class="h-full overflow-y-auto w-full border-r relative">
+      <div class="h-full overflow-y-auto w-full border-r relative pb-5">
         <header class="pt-2 pb-4 flex flex-col items-center justify-center">
           <VAvatar :user="userStore.user" size="xlarge" class="w-20 h-20" height="100" width="100" />
           <div class="text-center">
@@ -44,6 +45,9 @@ const links = ref([
             </h1>
             <p class="text-sm">{{ (userStore.user?.email ?? '') || (userStore.user?.username ?? '') }}</p>
             <p class="text-xs uppercase text-red-500">ADMININSTRATOR</p>
+            <div v-if="!userStore.user.email" class="p-4">
+              <VEmailNotifier />
+            </div>
           </div>
         </header>
         <div class="px-5 grid">
@@ -66,7 +70,7 @@ const links = ref([
           </div>
         </div>
 
-        <div class="absolute w-full bottom-5 left-0 px-5">
+        <div class="w-full px-5">
           <Button @click="useSignOut($router)" label="Log out" icon="pi pi-sign-out" icon-pos="right" fluid />
         </div>
       </div>
