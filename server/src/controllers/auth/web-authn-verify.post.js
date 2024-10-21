@@ -75,7 +75,7 @@ module.exports = {
           level: user.level,
           token: token
         }
-      })
+      });
     }
 
     return res.status(200).json({

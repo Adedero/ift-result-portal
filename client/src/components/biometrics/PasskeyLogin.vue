@@ -1,5 +1,5 @@
 <script setup>
-import { inject, onMounted, ref, watch } from "vue";
+import { inject, onMounted, ref } from "vue";
 import useFetch from "../../composables/fetch/use-fetch";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
@@ -16,6 +16,7 @@ const isBiometricsSupportedByDevice = ref(false);
 
 const loading = ref(false);
 const error = ref(false);
+
 const login = async () => {
   loading.value = true;
   error.value = null;
@@ -99,6 +100,13 @@ onMounted(async () => {
       <p class="ml-5 text-red-400">
         Sorry! You cannot use face ID or fingerprint for verification on this device.
       </p>
+    </div>
+
+    <div v-else class="w-full h-60 flex flex-col gap-5 items-center justify-center">
+      <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent" animationDuration=".5s"
+        aria-label="Custom ProgressSpinner" />
+
+        <p class="font-medium text-slate-500 text-center">Please, wait...</p>
     </div>
   </div>
 </template>

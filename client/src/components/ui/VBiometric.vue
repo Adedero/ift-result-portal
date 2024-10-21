@@ -19,16 +19,16 @@ const loading = ref(false);
 const error = ref(null);
 const data = ref(null);
 
-const getAuthnOptions = async () => {
+const getAuthnPasskeys = async () => {
   loading.value = true;
   error.value = null;
   const { error: err } = await useFetch(
-    `${props.role}/web-authn-options/${userStore.user.id}`,
+    `${props.role}/web-authn-passkeys/${userStore.user.id}`,
     { router, toast },
     (payload) => {
-      if (payload && payload.options) {
+      if (payload && payload.passkeys) {
         data.value = {
-          options: payload.options
+          passkeys: payload.passkeys
         }
       }
     }
@@ -42,12 +42,16 @@ const regError = ref(null);
 const registerBiometrics = async () => {
   isRegistering.value = true;
   regError.value = null;
-  const { data: optionsData, error: err } = await useFetch(`${props.role}/web-authn-register/${userStore.user.id}`, { method: "POST", router, toast });
+  const { data: optionsData, error: err } = await useFetch(
+    `${props.role}/web-authn-register/${userStore.user.id}`,
+    { method: "POST", router, toast }
+  );
+
   if (optionsData.value) {
     const { options } = optionsData.value;
     const webAuthnJSON = await startRegistration({ optionsJSON: options });
     if (!webAuthnJSON) {
-      loading.value = false;
+      isRegistering.value = false;
       regError.value = "Failed to register biometrics. Your device may not support this feature."
     }
     const { error: e } = await useFetch(
@@ -55,11 +59,12 @@ const registerBiometrics = async () => {
       { method: "POST", router, toast, body: { webAuthnJSON } },
       (payload) => {
         toast.add({ severity: payload.verified ? 'success' : 'warning', summary: payload.info, detail: payload.message });
+        
+        isRegistering.value = false;
+        regError.value = e.value;
+        return;
       }
     );
-    isRegistering.value = false;
-    regError.value = e.value;
-    return;
   }
   isRegistering.value = false;
   regError.value = err.value;
@@ -71,8 +76,8 @@ onMounted(async () => {
     const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
     isBiometricsSupportedByDevice.value = available;
     if (available) {
-      await getAuthnOptions();
-    }
+      await getAuthnPasskeys();
+    } 
   } else {
     isBiometricsSupportedByBrowser.value = false;
     return;
@@ -103,20 +108,21 @@ onMounted(async () => {
       </p>
     </div>
 
-    <div v-else class="mt-4">
+    <div class="mt-4">
       <section v-if="loading" class="h-72 px-2 pb-5 md:px-5 grid w-full place-content-center">
-        Loading...
+        <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent" animationDuration=".5s"
+          aria-label="Custom ProgressSpinner" />
       </section>
 
       <section v-else-if="error" class="h-72 px-2 pb-5 md:px-5 grid w-full place-content-center">
-        <ServerError :error @retry="getAuthnOptions" />
+        <ServerError :error @retry="getAuthnPasskeys" />
       </section>
 
-      <div v-else-if="!data || !data.options">
+      <div v-else-if="data && data.passkeys.length < 1">
         <Card class="w-full">
           <template #title>Set up biometrics</template>
           <template #content>
-            <div class="w-full flex items-center gap-4">
+            <div class="w-full text-center md:text-left flex flex-col md:flex-row items-center gap-4">
               <div class="min-w-40 w-[10%] max-w-80">
                 <img :src="biometrics" alt="biometrics" class="w-full">
               </div>
@@ -139,11 +145,11 @@ onMounted(async () => {
         </Card>
       </div>
 
-      <div v-else-if="data && data.options">
+      <div v-else-if="data && data.passkeys.length > 0">
         <Card class="w-full">
           <template #title>All good here.</template>
           <template #content>
-            <div class="w-full flex items-center gap-4">
+            <div class="w-full text-center md:text-left flex flex-col md:flex-row items-center gap-4">
               <div class="min-w-40 w-[10%] max-w-80">
                 <img :src="biometrics" alt="biometrics" class="w-full">
               </div>

@@ -40,8 +40,7 @@ module.exports = {
     });
      user.options = options;
      await user.save();
-
-    console.log(options);
+     
     return res.status(200).json({ options })
   }
 }

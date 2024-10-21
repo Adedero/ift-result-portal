@@ -18,10 +18,10 @@ module.exports = {
         message: "User not found"
       });
     }
-    const { options } = user;
+    const { passkeys } = user;
 
     return res.json({
-      options
+      passkeys
     });
   }
 }

@@ -50,11 +50,9 @@ module.exports = {
         backedUp: verification.registrationInfo.credentialBackedUp,
         transports: webAuthnJSON.transports
       });
-
-      delete user.options;
       await user.save();
     }
-    
+    delete user.options;
 
     return res.status(200).json({
       verified: verification.verified,

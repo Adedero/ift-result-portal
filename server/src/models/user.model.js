@@ -67,10 +67,6 @@ module.exports = (mongoose) => {
     level: {
       type: Number,
     },
-    faceDescriptor: {
-      descriptor: Object,
-      createdAt: Date
-    },
     passkeys: {
       type: Array,
       default: []

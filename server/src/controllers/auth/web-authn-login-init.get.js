@@ -31,12 +31,6 @@ module.exports = {
         message: "User not found. Check the username, email, registration number or staff ID provided."
       });
     }
-    /* const { options } = user;
-
-    if (!options || !options.challenge) return res.status(400).json({
-      info: "NO biometric information available.",
-      message: 'You need to set up your biometrics first. Log in with your password and register your biometrics.'
-    }); */
 
     const options = await generateAuthenticationOptions({
       rpID: process.env.RP_ID,
@@ -44,7 +38,6 @@ module.exports = {
         id: passkey.id,
         transports: passkey.transports
       }))
-
     });
 
     user.options = options;

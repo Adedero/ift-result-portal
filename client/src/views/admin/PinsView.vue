@@ -10,7 +10,7 @@ const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm();
 
-const { error, data: pins } = useFetch("admin/pins", { router, toast, cache: true }, (payload) => console.log(payload))
+const { error, data: pins } = useFetch("admin/pins", { router, toast, cache: true })
 
 const isDeleting = ref(false);
 
