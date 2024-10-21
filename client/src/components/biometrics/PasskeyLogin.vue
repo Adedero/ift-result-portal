@@ -6,6 +6,8 @@ import { useToast } from "primevue/usetoast";
 import { startAuthentication } from "@simplewebauthn/browser";
 import useUserStore from "../../stores/user.store";
 
+const emit = defineEmits(["done"]);
+
 const router = useRouter();
 const toast = useToast();
 const userStore = useUserStore();
@@ -56,6 +58,14 @@ const login = async () => {
           default:
             break;
         }
+        emit("done");
+      } else {
+        toast.add({
+          severity: "warn",
+          summary: "Login failed. Please try again.",
+          life: 5000,
+        });
+        emit("done");
       }
     }
   )

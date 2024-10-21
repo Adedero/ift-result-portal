@@ -53,7 +53,7 @@ const openPasskeyLogin = () => {
       <Dialog v-model:visible="visible" header="Biometric login" class="w-96 max-w-[26rem]">
         <Suspense>
           <template #default>
-            <PasskeyLogin v-if="visible" />
+            <PasskeyLogin @done="visible = false" v-if="visible" />
           </template>
 
           <template #fallback>
