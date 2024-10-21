@@ -1,205 +1,215 @@
 <script setup>
-import { inject, onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, computed } from 'vue';
 import * as faceapi from 'face-api.js';
-import FaceId from '../../composables/use-faceid';
-import useFetch from '../../composables/fetch/use-fetch';
-import { useToast } from 'primevue/usetoast';
-import { useRouter } from 'vue-router';
 
-const props = defineProps({ action: { type: String, default: "verify" } });
-const userLoggingIn = inject("userIdAndPassword");
-const router = useRouter();
-const toast = useToast();
-const loading = ref(false);
-const error = ref(null);
-const video = ref(null);
-const faceId = ref(null);
-const storedFaceDescriptor = ref(null);
-const currentFaceDescriptor = ref(null);
-
-const checkExistingFaceDescriptor = async () => {
-  loading.value = true;
-  error.value = null;
-  const { error: err } = await useFetch(
-    `auth/user-face-descriptor/${userLoggingIn.value.id}`,
-    { router, toast, useBaseUrl: true, sendToken: false},
-    (payload) => {
-      storedFaceDescriptor.value = payload.faceDescriptor;
-    }
-  )
-  loading.value = false;
-  error.value = err.value;
-}
-
-onMounted(async () => {
-  faceId.value = new FaceId(video);
-  await checkExistingFaceDescriptor();
-  if (storedFaceDescriptor.value.descriptor) {
-    faceId.value.startVideoStream();
-    currentFaceDescriptor.value = faceId.value.getFaceDescriptor();
-    if (currentFaceDescriptor.value) {
-      faceId.value.verifyFace()
-    }
-  }
+const props = defineProps({
+  action: { 
+    type: String,
+    default: "verify"
+  },
+  storedFaceDescriptor: { type: Object, default: () => ({}) }
 });
 
-onUnmounted(() => {
-  faceId.value.stopVideoStream();
-})
+const emit = defineEmits(["capture", "verify"]);
 
-/* 
-const startVideoStream = () => {
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then((mediaStream) => {
-      stream.value = mediaStream;
-      video.value.srcObject = mediaStream
-    })
-    .catch((err) => console.error("Error starting video stream:", err));
-};
+const loading = ref(false);
+const error = ref(null);
 
-const stopVideoStream = () => {
+const video = ref(null);
+const canvas = ref(null);
+
+const stream = ref(null);
+const currentFaceDescriptor = ref(null);
+let modelsLoaded = false;
+
+const intervalId = ref(null); 
+
+const displaySize = computed(() => {
+  if (video.value) {
+    return { width: video.value.width, height: video.value.height };
+  }
+  return { width: 400, height: 400 };
+});
+
+async function captureFace() {
+  loading.value = true;
+  error.value = null;
+  try {
+    currentFaceDescriptor.value = await getFaceDescriptor();
+    console.log(currentFaceDescriptor.value);
+    emit('capture', currentFaceDescriptor.value);
+  } catch (err) {
+    error.value = err;
+    console.log('Error capturing face descriptor: ', err);
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function verifyFace() {
+  loading.value = true;
+  error.value = null;
+  try {
+    const faceMatcher = new faceapi.FaceMatcher(props.storedFaceDescriptor, 0.6);
+    const descriptor = await getFaceDescriptor();
+    const match = faceMatcher.findBestMatch(descriptor);
+    const verified = match.distance <= 0.6;
+    emit('verify', verified);
+  } catch (err) {
+    error.value = err;
+    console.log('Error verifying face: ', err);
+  } finally {
+    loading.value = false;
+  }
+}
+
+// Load models if they are not already loaded
+async function loadModels() {
+  if (!modelsLoaded) {
+    const MODEL_URL = '/models';
+    try {
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+      ]);
+      modelsLoaded = true;
+    } catch (err) {
+      console.log('Error loading models: ', err);
+      throw err;
+    }
+  }
+}
+
+// Start video stream
+async function startVideoStream() {
+  try {
+    stream.value = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.value.srcObject = stream.value;
+    await video.value.play();
+  } catch (err) {
+    console.log('Error starting video stream: ', err);
+    throw err;
+  }
+}
+
+// Stop video stream
+function stopVideoStream() {
   if (stream.value) {
     stream.value.getTracks().forEach(track => track.stop());
-    if (video.value) video.value.srcObject = null;
+    if (video.value) {
+      video.value.removeEventListener("play", handleVideoPlay);
+      video.value.srcObject = null;
+    }
     console.log("Video stream stopped.");
   }
-};
+}
 
-const loadModels = async () => {
-  const MODEL_URL = '/models'; 
-  Promise.all([
-    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-  ]);  
-};
+// Get face descriptor
+async function getFaceDescriptor() {
+  try {
+    const detections = await faceapi.detectSingleFace(video.value, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withFaceDescriptor();
 
-const createCanvasElement = () => {
+    console.log(detections)
+
+    if (!detections) throw new Error('No face detected in the video.');
+
+    alert("face detected")
+
+    const resizedDetections = faceapi.resizeResults(detections, displaySize.value);
+
+    canvas.value = createCanvasElement();
+    faceapi.draw.drawDetections(canvas.value, resizedDetections);
+    faceapi.draw.drawFaceLandmarks(canvas.value, resizedDetections)
+
+    const { descriptor } = detections;
+    return descriptor;
+    
+  } catch (err) {
+    console.error('Error getting face descriptor: ', err);
+    throw err;
+  }
+}
+
+// Create canvas element for drawing
+function createCanvasElement() {
   const canvas = faceapi.createCanvasFromMedia(video.value);
+  faceapi.matchDimensions(canvas, displaySize.value);
+  canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
   canvas.style.position = "absolute";
   canvas.style.zIndex = 1;
   canvas.style.top = 0;
   canvas.style.left = 0;
-  const displaySize = { width: video.value.width, height: video.value.height };
-  faceapi.matchDimensions(canvas, displaySize);
-  canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
   video.value.insertAdjacentElement('afterend', canvas);
+  console.log(canvas)
   return canvas;
 }
 
-const captureFace = async () => {
-  const canvas = createCanvasElement();
-  const displaySize = { width: video.value.width, height: video.value.height };
-  const detections = await faceapi.detectSingleFace(video.value, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
-
-  console.log(detections);
-
-  if (detections) {
-    const resizedDetections = faceapi.resizeResults(detections, displaySize);
-    faceapi.draw.drawDetections(canvas, resizedDetections);
-    userFaceDescriptor.value = detections.descriptor;
-
-  } else {
-    console.error("No face detected!");
-  }
-};
-
-const verifyFace = async () => {
-  const detections = await faceapi.detectSingleFace(video.value, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
-
-  if (detections) {
-    console.log(detections)
-    return;
-    const currentFaceDescriptor = detections.descriptor;
-
-    // Fetch stored descriptor from the backend
-    const response = await fetch('/api/get-stored-face-descriptor');
-    const { storedDescriptor } = await response.json();
-
-    const distance = faceapi.euclideanDistance(currentFaceDescriptor, storedDescriptor);
-
-    if (distance < 0.6) {  // 0.6 is the typical threshold for face matching
-      alert("Login successful!");
-    } else {
-      alert("Face not recognized, login failed!");
+// Handle video play event
+async function handleVideoPlay() {
+  if (props.action === "verify") {
+    if (!props.storedFaceDescriptor || Object.keys(props.storedFaceDescriptor).length === 0) {
+      error.value = { message: "No face descriptor found. Please capture a face first." };
+      return;
     }
-  } else {
-    console.error("No face detected!");
+    await verifyFace();
   }
-};
+
+  if (props.action === "capture") {
+    await captureFace();
+  }
+}
+
+async function retry() {
+  if (video.value) {
+    stopVideoStream();
+  }
+  error.value = null;
+  await loadModels();
+  await startVideoStream();
+}
 
 onMounted(async () => {
-  console.log(userLoggingIn)
-  await loadModels();
-  startVideoStream();
-
-  video.value.addEventListener("play", () => {
-    captureFace();
-  });
+  video.value.addEventListener("playing", handleVideoPlay);
+  try {
+    await loadModels();
+    await startVideoStream();
+  } catch (err) {
+    console.error('Error starting video on mount:', err);
+  }
 });
 
 onUnmounted(() => {
   stopVideoStream();
-}) */
+});
 </script>
 
+
 <template>
-  <div class="flex flex-col gap-4">
-    <div class="w-80 h-60 max-w-[400px] max-h-[400px] relative">
-      <div v-if="error" class="w-full h-full gap-4 flex flex-col items-center justify-center">
-        <Message>
+  <div class="grid gap-4">
+    <div v-if="error" class="mt-2 gap-4 flex items-center justify-center">
+      <Message>
+        <div class="flex flex-col items-center justify-center gap-1">
           <p>{{ error.message }}</p>
-        </Message>
-        <Button label="retry" icon="pi pi-refresh" @click="checkExistingFaceDescriptor" />
-      </div>
-
-      <div v-if="loading" class="w-full h-full gap-2 flex flex-col items-center justify-center">
-        <div class="loader"></div>
-      </div>
-
-      <video v-show="storedFaceDescriptor" id="faceid-video" ref="video" autoplay playsinline muted width="400" height="400"></video>
+          <Button label="Try again" icon="pi pi-refresh" size="small" @click="retry" />
+        </div>
+      </Message>
     </div>
-    <!-- <div class="flex items-center justify-end">
-      <Button label="Verify" icon="pi pi-check-circle" icon-pos="right" />
-    </div> -->
+
+    <div class="relative">
+      <video id="faceid-video" ref="video" playsinline muted width="400" height="400"></video>
+    </div>
   </div>
 </template>
 
-
 <style scoped>
-.loader {
-  width: 17px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--p-primary-500);
-  display: grid;
-  animation: l22-0 2s infinite linear;
-}
-
-.loader:before,
-.loader:after {
-  content: "";
-  grid-area: 1/1;
-  margin: 15%;
-  border-radius: 50%;
-  background: inherit;
-  transform: rotate(0deg) translate(150%);
-  animation: l22 1s infinite;
-}
-
-.loader:after {
-  animation-delay: -.5s
-}
-
-@keyframes l22-0 {
-  100% {
-    transform: rotate(1turn)
-  }
-}
-
-@keyframes l22 {
-  100% {
-    transform: rotate(1turn) translate(150%)
-  }
+.canvas {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  top: 0;
 }
 </style>
+

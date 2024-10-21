@@ -15,20 +15,24 @@ module.exports = {
         $or: [
           { username: id },
           { email: id },
-          { registrationNumber: id },
+          { regNumber: id },
           { staffId: id }
         ]
       }
     ).lean();
     if (!user) return res.status(400).json({
-      info: "Not found",
-      message: 'User not found. Check the username, email, registration number or staff ID provided'
+      info: "User Not found",
+      message: 'Check the username, email, registration number or staff ID provided'
     });
     const { faceDescriptor } = user;
-    if (!faceDescriptor || faceDescriptor.descriptor) return res.status(400).json({
-      info: "No Face ID", message: 'You do not have face ID set up yet.'
-    });
 
+    if (!faceDescriptor || faceDescriptor.descriptor) {
+      return res.status(400).json({
+        info: "No Face ID",
+        message: 'You do not have face ID set up yet. Log in with your password to continue.'
+      });
+    }
+      
     return res.status(200).json({ faceDescriptor });
   }
 }

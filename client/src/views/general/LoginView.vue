@@ -4,7 +4,12 @@ import { defineAsyncComponent, provide, ref } from 'vue';
 
 const PasskeyLogin = defineAsyncComponent({
   loader: () => import("../../components/biometrics/PasskeyLogin.vue")
-})
+});
+
+const FaceidLogin = defineAsyncComponent({
+  loader: () => import("../../components/biometrics/FaceidLogin.vue")
+});
+
 const toast = useToast();
 const user = ref({});
 provide("userIdAndPassword", user);
@@ -44,13 +49,29 @@ const openPasskeyLogin = () => {
     <div class="mt-5 grid gap-2">
       <p>Log in with:</p>
 
-      <Button @click="openPasskeyLogin" label="Passkey or Biometrics" outlined fluid>
+      <Button @click="openPasskeyLogin" label="Face ID" outlined fluid>
         <template #icon>
-          <VIcon icon="fingerprint" />
+          <VIcon icon="face-id" />
         </template>
       </Button>
 
-      <Dialog v-model:visible="visible" header="Biometric login" class="w-96 max-w-[26rem]">
+      <Dialog v-model:visible="visible" header="Face ID Login">
+        <Suspense>
+          <template #default>
+            <FaceidLogin @done="visible = false" v-if="visible" />
+          </template>
+
+          <template #fallback>
+            <div
+              class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-40 shadow bg-white rounded-md p-5 flex items-center justify-centers">
+              <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent"
+                animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+            </div>
+          </template>
+        </Suspense>
+      </Dialog>
+
+      <!-- <Dialog v-model:visible="visible" header="Biometric login" class="w-96 max-w-[26rem]">
         <Suspense>
           <template #default>
             <PasskeyLogin @done="visible = false" v-if="visible" />
@@ -64,7 +85,7 @@ const openPasskeyLogin = () => {
             </div>
           </template>
         </Suspense>
-      </Dialog>
+      </Dialog> -->
 
 
 

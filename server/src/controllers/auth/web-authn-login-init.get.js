@@ -32,6 +32,13 @@ module.exports = {
       });
     }
 
+    if (!user.passkeys || !user.passkeys.length) {
+      return res.status(200).json({
+        info: "Failed",
+        message: "Biometrics has not been set up. Log in with your password and set up your biometrics"
+      })
+    }
+
     const options = await generateAuthenticationOptions({
       rpID: process.env.RP_ID,
       allowCredentials: user.passkeys.map(passkey => ({
