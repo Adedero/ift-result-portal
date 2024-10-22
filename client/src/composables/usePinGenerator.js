@@ -15,13 +15,18 @@ const usePinGenerator = () => {
       return { error: error.value, data: data.value };
     },
 
-    deletePin: async () => {
-
+    deletePins: async (options) => {
+      options = {
+        ...options,
+        method: "PUT"
+      }
+      const { error, data } = await useFetch(
+        `/admin/delete-pins`,
+        options
+      );
+      return { error: error.value, data: data.value }
     },
 
-    registerWithPin: async () => {
-
-    },
 
     checkPinValidity: async (pin, options = {}) => {
       if (!pin) return;

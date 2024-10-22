@@ -9,7 +9,7 @@ const asyncErrorHandler = (err, req, res, next) => {
       stack: err.stack
     });
   }
-  return res.status(500).json({ message: "Something went wrong. Try again later." });
+  return res.status(500).json({ info: "Failed", message: "Something went wrong. Try again later." });
 }
 
 module.exports = asyncErrorHandler;

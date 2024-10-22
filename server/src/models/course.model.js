@@ -16,7 +16,7 @@ module.exports = (mongoose) => {
     level: {
       type: Number,
       required: true,
-      enum: [100, 200, 300, 500, 500, 600, 700]
+      enum: [100, 200, 300, 400, 500, 600, 700]
     }
   }, {
     timestamps: true
@@ -24,7 +24,7 @@ module.exports = (mongoose) => {
 
 
   CourseSchema.pre("save", function (next) {
-    const courseParts = this.courseCode.split("-");
+    const courseParts = this.code.split("-");
     if (courseParts.length !== 2) {
       return next(new Error("Invalid course code format"));
     }

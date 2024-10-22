@@ -23,7 +23,7 @@ const video = ref(null);
 
 const stream = ref(null);
 const currentFaceDescriptor = ref(null);
-let modelsLoaded = false;
+let modelsLoaded = ref(false);
  
 
 const displaySize = computed(() => {
@@ -38,7 +38,6 @@ async function captureFace() {
   error.value = null;
   try {
     currentFaceDescriptor.value = await getFaceDescriptor();
-    console.log(currentFaceDescriptor.value);
     emit('capture', currentFaceDescriptor.value);
   } catch (err) {
     error.value = err;
@@ -51,13 +50,12 @@ async function captureFace() {
 async function verifyFace() {
   loading.value = true;
   error.value = null;
-  
-  const convertedDescriptor = new Float32Array(Object.values(props.storedFaceDescriptor));
+  const descriptorAsFloat32Array = new Float32Array(Object.values(props.storedFaceDescriptor));
   try {
-    const faceMatcher = new faceapi.FaceMatcher(convertedDescriptor, 0.6);
+    const faceMatcher = new faceapi.FaceMatcher(descriptorAsFloat32Array, 0.5);
     const descriptor = await getFaceDescriptor();
     const match = faceMatcher.findBestMatch(descriptor);
-    const verified = match.distance <= 0.6;
+    const verified = match.distance <= 0.5;
     emit('verify', verified);
   } catch (err) {
     error.value = err;
@@ -69,7 +67,7 @@ async function verifyFace() {
 
 // Load models if they are not already loaded
 async function loadModels() {
-  if (!modelsLoaded) {
+  if (!modelsLoaded.value) {
     const MODEL_URL = '/models';
     try {
       await Promise.all([
@@ -78,7 +76,7 @@ async function loadModels() {
         faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
         faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
       ]);
-      modelsLoaded = true;
+      modelsLoaded.value = true;
     } catch (err) {
       console.log('Error loading models: ', err);
       throw err;
@@ -91,7 +89,7 @@ async function startVideoStream() {
   try {
     stream.value = await navigator.mediaDevices.getUserMedia({ video: true });
     video.value.srcObject = stream.value;
-    await video.value.play();
+    //await video.value.play();
   } catch (err) {
     console.log('Error starting video stream: ', err);
     throw err;
@@ -114,15 +112,16 @@ function stopVideoStream() {
 async function getFaceDescriptor() {
   try {
     const canvas = faceapi.createCanvasFromMedia(video.value);
-    videoContainer.value.insertBefore(canvas);
+    canvas.style.position = 'absolute'
+    canvas.style.left = 0;
+    canvas.style.top = 0;
     faceapi.matchDimensions(canvas, displaySize.value);
-    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    videoContainer.value.append(canvas);
 
-    const detections = await faceapi.detectSingleFace(video.value, new faceapi.TinyFaceDetectorOptions())
+    const detections = await faceapi.detectSingleFace(video.value, new faceapi.SsdMobilenetv1Options())
       .withFaceLandmarks()
       .withFaceDescriptor();
-
-    console.log(detections)
 
     if (!detections) throw new Error('No face detected. Try again.');
 
@@ -131,7 +130,7 @@ async function getFaceDescriptor() {
     faceapi.draw.drawDetections(canvas, resizedDetections);
     faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
 
-    const { descriptor } = detections[0];
+    const { descriptor } = detections;
     return descriptor;
     
   } catch (err) {
@@ -158,7 +157,10 @@ async function handleVideoPlay() {
 
 async function retry() {
   error.value = null;
-  if (!props.storedFaceDescriptor || Object.keys(props.storedFaceDescriptor).length === 0) {
+  if (
+    props.action === "verify"&&
+    (!props.storedFaceDescriptor || Object.keys(props.storedFaceDescriptor).length === 0)
+  ) {
     error.value = { 
       message: "No face descriptor found. Please log in with your password and capture a face first."
     };
@@ -190,7 +192,7 @@ onUnmounted(() => {
 
 <template>
   <div class="grid gap-4">
-    <div v-if="error" class="mt-2 gap-4 flex items-center justify-center">
+    <div v-if="error" class="mt-2 gap-4 flex items-center justify-center max-w-[400px]">
       <Message>
         <div class="flex flex-col items-center justify-center gap-1">
           <p>{{ error.message }}</p>
@@ -199,19 +201,26 @@ onUnmounted(() => {
       </Message>
     </div>
 
-    <div id="video-container" ref="videoContainer" class="relative">
-      <video id="faceid-video" ref="video" playsinline muted width="400" height="400"></video>
+    <div id="video-container" ref="videoContainer" class="relative overflow-hidden h-[400px] w-[400px]">
+      <video id="faceid-video" ref="video" autoplay playsinline muted width="400" height="400"></video>
     </div>
   </div>
 </template>
 
 <style scoped>
 #video-container {
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
   canvas {
     position: absolute;
     z-index: 20;
     left: 0;
     top: 0;
+    background-color: red;
   }
 }
 </style>

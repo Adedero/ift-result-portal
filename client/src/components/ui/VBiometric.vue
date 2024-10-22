@@ -1,112 +1,171 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { defineAsyncComponent, onMounted, ref } from 'vue';
 import useFetch from '../../composables/fetch/use-fetch';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
 import biometrics from "@/assets/biometrics.svg";
 import useUserStore from '../../stores/user.store';
+import FaceIdLoader from './FaceIdLoader.vue';
+import { useConfirm } from 'primevue/useconfirm';
+
+const FaceDetector = defineAsyncComponent({
+  loader: () => import('../biometrics/FaceDetector.vue')
+})
 
 const props = defineProps({ role: { type: String, default: "student" } });
 const router = useRouter();
 const toast = useToast();
 const userStore = useUserStore();
+const confirm = useConfirm();
+
+
+const visible = ref(false); //To register or change
+const visible_2 = ref(false) //To test
 
 const loading = ref(false);
 const error = ref(null);
 const data = ref(null);
 
-//Register descriptor
-//Change Descriptor: register new
+//Register descriptor or change
+const registering = ref(false);
+const registerFaceId = async (descriptor) => {
+  visible.value = false;
+  registering.value = true;
+  await useFetch(
+    `${props.role}/register-face-id`,
+    { router, toast, body: { descriptor }, method: 'POST', toastOnSuccess: true, toastLife: 5000, toastOnFailure: true },
+    (payload) => {
+      userStore.setUser(userStore.user.id, { faceDescriptor: payload.descriptor });
+    }
+  );
+  registering.value = false;
+}
+
+const testFaceId = (verified) => {
+  visible_2.value = false;
+  if (!verified) {
+    toast.add({
+      severity: "warn",
+      summary: "No match!",
+      detail: "Face ID verification failed. Register a new face ID and try again",
+      life: 6000
+    });
+    return
+  }
+  toast.add({
+    severity: "success",
+    summary: "It's a match!",
+    detail: "Face ID verification was successful.",
+    life: 5000
+  });
+}
+
+const deleting = ref(false);
+const deleteFaceId = async () => {
+  deleting.value = true;
+  await useFetch(
+    `${props.role}/delete-face-id`,
+    { router, toast, method: 'PUT', toastOnSuccess: true, toastLife: 5000, toastOnFailure: true },
+    () => {
+      userStore.setUser(userStore.user.id, { faceDescriptor: {} });
+    }
+  )
+  deleting.value = false;
+}
+
+const confirmDelete = () => {
+  confirm.require({
+    message: 'Are you sure you want to proceed?',
+    header: 'Confirmation',
+    icon: 'pi pi-exclamation-triangle',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Delete',
+      severity: 'danger'
+    },
+    accept: () => {
+      deleteFaceId()
+    },
+  })
+}
+
 //Delete descriptor
 </script>
 
 <template>
   <div class="h-full overflow-y-auto">
-    <div v-if="!isBiometricsSupportedByBrowser" class="text-center border-2 border-red-400 rounded-md p-3 bg-red-50">
-      <header>
-        <span class="pi pi pi-times-circle text-red-500"></span>
-        <span class="text-lg font-medium text-red-500"> Your browser does not support biometrics.</span>
+    <div v-if="!userStore.user.faceDescriptor || Object.keys(userStore.user.faceDescriptor).length === 0"
+      class="text-center border-2 border-blue-400 rounded-md p-3 bg-blue-50">
+      <header class="grid">
+        <span class="pi pi pi-info-circle text-blue-500" style="font-size: 1.5rem"></span>
+        <span class="text-lg font-medium text-blue-500">No Face ID</span>
       </header>
-      <p class="ml-5 text-red-400">
-        We recommend Firefox or Google Chrome for optimal performance. Switch to a different browswer and try again.
+      <p class="ml-5 text-blue-400">
+        You have not yet enabled facial recognition for your account.
       </p>
+      <Button @click="visible = true" :loading="registering" label="Set up face ID" icon="pi pi-face-smile" class="mt-2" />
     </div>
 
-    <div v-else-if="!isBiometricsSupportedByDevice"
-      class="text-center border-2 border-red-400 rounded-md p-3 bg-red-50">
-      <header>
-        <span class="pi pi pi-times-circle text-red-500"></span>
-        <span class="text-lg font-medium text-red-500"> Your device does not support biometrics.</span>
-      </header>
-      <p class="ml-5 text-red-400">
-        Sorry! You cannot use face ID or fingerprint for verification on this device.
-      </p>
-    </div>
-
-    <div class="mt-4">
-      <section v-if="loading" class="h-72 px-2 pb-5 md:px-5 grid w-full place-content-center">
-        <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent" animationDuration=".5s"
-          aria-label="Custom ProgressSpinner" />
-      </section>
-
-      <section v-else-if="error" class="h-72 px-2 pb-5 md:px-5 grid w-full place-content-center">
-        <ServerError :error @retry="getAuthnPasskeys" />
-      </section>
-
-      <div v-else-if="data && data.passkeys.length < 1">
-        <Card class="w-full">
-          <template #title>Set up biometrics</template>
-          <template #content>
-            <div class="w-full text-center md:text-left flex flex-col md:flex-row items-center gap-4">
-              <div class="min-w-40 w-[10%] max-w-80">
-                <img :src="biometrics" alt="biometrics" class="w-full">
-              </div>
-
-              <div class="text-balance">
-                <p class="text-green-500 font-medium text-lg">
-                  <span class="pi pi-check-circle"></span>
-                  Your device supports biometrics.
-                </p>
-                <p>
-                  But you need to set it up for your account first!
-                </p>
-                <Divider />
-                <Button @click="registerBiometrics" :label="isRegistering ? 'Setting up...' : 'Set up biometrics'"
-                  icon="pi pi-hourglass" :loading="isRegistering" />
-                <small v-if="regError" class="block mt-2 text-red-500">{{ regError.message }}</small>
-              </div>
-            </div>
-          </template>
-        </Card>
-      </div>
-
-      <div v-else-if="data && data.passkeys.length > 0">
-        <Card class="w-full">
+    <div v-else>
+      <Card class="w-full">
           <template #title>All good here.</template>
           <template #content>
             <div class="w-full text-center md:text-left flex flex-col md:flex-row items-center gap-4">
-              <div class="min-w-40 w-[10%] max-w-80">
+              <div class="min-w-60 w-[10%] max-w-96">
                 <img :src="biometrics" alt="biometrics" class="w-full">
               </div>
 
-              <div class="text-balance">
-                <p class="text-green-500 font-medium text-lg">
-                  <span class="pi pi-check-circle"></span>
-                  Your biometrics is up and running.
+              <div class="text-balance flex flex-col items-center justify-center">
+                <div class="flex flex-col gap-2 md:flex-row items-center">
+                  <p class="text-green-500 font-medium text-lg">
+                  <span class="pi pi-face-smile"></span>
+                  Your face ID is set up and running.
                 </p>
-                <p>
-                  You can log in with your face ID or fingerprint if you have any one configured on your device.
+                <Button @click="visible_2 = true" label="Verify" icon="pi pi-check-circle" />
+                </div>
+                
+                <p class="mt-4 md:mt-3">
+                  What do you want to do next?
                 </p>
-                <Divider />
-                <Button @click="registerBiometrics"
-                  :label="isRegistering ? 'Registering...' : 'Register new biometrics'" icon="pi pi-hourglass"
-                  :loading="isRegistering" />
-                <small v-if="regError" class="block mt-2 text-red-500">{{ regError.message }}</small>
+                <Divider class="py-1" />
+                <div class="flex items-center justify-center gap-2 flex-wrap">
+                  <Button @click="visible = true" :loading="registering" severity="secondary" icon="pi pi-refresh" label="Change Face ID" />
+                  <Button @click="confirmDelete" :loading="deleting" severity="danger" outlined icon="pi pi-trash" label="Delete Face ID" />
+                </div>
               </div>
             </div>
           </template>
         </Card>
-      </div>
     </div>
+
+    <Dialog v-model:visible="visible" modal header="Register Face ID">
+      <Suspense>
+        <template #default>
+          <FaceDetector v-if="visible" action="capture" @capture="registerFaceId" />
+        </template>
+        <template #fallback>
+          <div>
+            <FaceIdLoader />
+          </div>
+        </template>
+      </Suspense>
+    </Dialog>
+
+    <Dialog v-model:visible="visible_2" modal header="Register Face ID">
+      <Suspense>
+        <template #default>
+          <FaceDetector v-if="visible_2" :storedFaceDescriptor="userStore.user.faceDescriptor" action="verify" @verify="testFaceId" />
+        </template>
+        <template #fallback>
+          <div>
+            <FaceIdLoader />
+          </div>
+        </template>
+      </Suspense>
+    </Dialog>
   </div>
 </template>

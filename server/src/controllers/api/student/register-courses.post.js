@@ -3,8 +3,14 @@ const db = require("../../../database/db");
 module.exports = {
   fn: async (req, res) => {
     const courseReg = req.body;
-    console.log(courseReg);
+    const { session, semester, courses } = courseReg;
 
+    if (!session || !semester || !(courses.length > 0)) {
+      return res.status(400).json({
+        info: "Could not complete course registration",
+        message: "Session, semester, and courses are reuired."
+      });
+    }
     courseReg.student = req.user.id;
     const record = await db.CourseRegistration.findOneAndUpdate(
       { student: req.user.id, session: courseReg.session, semester: courseReg.semester },

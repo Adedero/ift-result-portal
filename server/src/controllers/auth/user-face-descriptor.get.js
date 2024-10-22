@@ -26,7 +26,7 @@ module.exports = {
     });
     const { _id, faceDescriptor } = user;
 
-    if (!faceDescriptor || faceDescriptor.descriptor) {
+    if (!faceDescriptor) {
       return res.status(400).json({
         info: "No Face ID",
         message: 'You do not have face ID set up yet. Log in with your password to continue.'

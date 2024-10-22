@@ -266,6 +266,44 @@ const GeneralController = {
     return res.status(200).json({ image: url });
   },
 
+  removeImage: async (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({
+        info: "Failed",
+        message: 'No ID provided'
+      });
+    }
+    const user = await db.User.findById(id);
+    if (!user) {
+      return res.status(404).json({ info: "Not found", message: "User not found." });
+    }
+    const uploadDir = path.resolve(`public/users/${user.role.toLowerCase().trim()}s`);
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    if (user.image) {
+      fs.unlink(path.join(uploadDir, user.image.split("/").pop()), (err) => {
+        if (err) {
+          logger.info({
+            message: "Error deleting user image",
+            error: err.message,
+            id: user._id,
+            name: `${user.firstName} ${user.lastName}`,
+            timeStamp: Date.now()
+          });
+        }
+      });
+    }
+    user.image = "";
+    await user.save();
+    return res.status(200).json({
+      info: "Done",
+      message: "Profile picture removed."
+    })
+  },
+
   verifyOldPassword: async (req, res) => {
     const { password } = req.body;
     if (!password) {
@@ -285,7 +323,7 @@ const GeneralController = {
     if (!user) {
       return res.status(404).json({ info: "Not found", message: "User not found." });
     }
-    const verified = await bcrypt.compare(password, user.password);
+    const verified = await bcrypt.compare(password.trim(), user.password);
     return res.status(200).json({ verified });
   },
 
@@ -298,6 +336,8 @@ const GeneralController = {
       });
     }
     const { passwords } = req.body;
+
+    
    
     if (!passwords || !passwords.oldPassword ||!passwords.newPassword ||!passwords.confirmPassword) {
       return res.status(400).json({
@@ -305,12 +345,19 @@ const GeneralController = {
         message: "No passwords provided."
       })
     }
+
+    if (passwords.newPassword.trim() === passwords.oldPassword.trim()) {
+      return res.status(400).json({
+        info: "Invalid new password",
+        message: "New password cannot be the same with old pasword."
+      })
+    }
     const user = await db.User.findById(id, { password: 1 })
     if (!user) {
       return res.status(404).json({ info: "Not found", message: "User not found." });
     }
 
-    const invalid = Object.keys(passwords).some(password => password.length < 8);
+    const invalid = Object.keys(passwords).some(password => password.trim().length < 8);
     if (invalid) {
       return res.status(400).json({
         info: "Failed",
@@ -332,7 +379,7 @@ const GeneralController = {
         message: "Old password is incorrect."
       });
     }
-    const hashedPassword = await bcrypt.hash(passwords.newPassword, 10);
+    const hashedPassword = await bcrypt.hash(passwords.newPassword.trim(), 10);
     user.password = hashedPassword;
     await user.save();
     return res.status(200).json({
@@ -388,14 +435,20 @@ const GeneralController = {
       });
     }
 
-    let { studentClass, level, role } = profile;
+    let { studentClass, level, staffId } = profile;
 
-    const edit = role === "STUDENT" ? { level } : { studentClass }
+    let edit = {};
 
+    if (req.user.role === 'STUDENT') edit.level = level;
+    if (req.user.role === 'STAFF') edit.studentClass = studentClass;
+    if (req.user.role === 'ADMIN') {
+      edit.studentClass = studentClass;
+      edit.staffId = staffId
+    }
 
     await db.User.updateOne({ _id: id }, edit);
     return res.status(200).json({
-      user: { studentClass, level },
+      user: { studentClass, level, staffId },
       info: "Done",
       message: "Academic details updated successfully."
     })

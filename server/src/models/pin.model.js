@@ -13,15 +13,6 @@ module.exports = (mongoose) => {
     validity: {
       type: Date,
       required: true
-    },
-    isUsed: {
-      type: Boolean,
-      required: true,
-      default: false
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
     }
   }, {
     timestamps: true

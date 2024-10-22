@@ -20,7 +20,7 @@ const { error, data } = await useFetch("student/course-registration", { cache: t
 
     <div class="max-h-[calc(100%-4rem)] overflow-y-auto">
       <section v-if="error" class="h-72 px-2 pb-5 md:px-5 grid w-full place-content-center">
-        <ServerErro :error reloadOnRetry />
+        <ServerError :error reloadOnRetry />
       </section>
 
       <section v-else-if="data" class="h-full pb-5">

@@ -214,7 +214,7 @@ onMounted(async () => {
 
         <IconField>
           <InputIcon class="pi pi-search" />
-          <InputText v-model="search" placeholder="Search" fluid class="h-8 text-sm" />
+          <InputText v-model.trim="search" placeholder="Search" fluid class="h-8 text-sm" />
         </IconField>
       </div>
 

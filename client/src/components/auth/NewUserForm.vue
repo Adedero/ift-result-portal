@@ -156,7 +156,7 @@ const goToDashboard = () => {
 
               <div v-if="pin.role === 'STUDENT'" class="grid">
                 <label for="reg-number" class="text-sm text-slate-600 font-medium">Reg. Number</label>
-                <InputNumber v-model.trim="user.regNumber" input-id="reg-number" :useGrouping="false" fluid />
+                <InputText v-model.trim="user.regNumber" id="reg-number" fluid v-keyfilter.int />
               </div>
 
               <div v-if="pin.role !== 'STUDENT'" class="grid">

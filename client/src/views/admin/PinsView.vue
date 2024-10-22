@@ -4,32 +4,63 @@ import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import useFetch from "@/composables/fetch/use-fetch";
 import { useConfirm } from "primevue/useconfirm";
-
+import usePinGenerator from "../../composables/usePinGenerator";
 
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm();
 
-const { error, data: pins } = useFetch("admin/pins", { router, toast, cache: true })
 
-const isDeleting = ref(false);
+const { error, data: pins } = await useFetch("admin/pins", { router, toast, cache: true })
 
-const deletePins = async () => {
-  isDeleting.value = true;
-  return
-  await useFetch(
-    "admin/delete-pins",
-    { method: "POST", router, toast, toastOnFailure: true, toastLife: 8000, body: selectedResults.value },
-    (payload) => {
-      if (payload.success) {
-        const removedResultsIds = selectedResults.value.map(result => result._id);
-        data.value.results = [
-          ...data.value.results.filter(result => !removedResultsIds.includes(result._id)),
-        ];
-      }
-    }
-  )
-  isDeleting.value = false;
+
+const pinGenerator = usePinGenerator();
+const loading = ref({});
+
+const addGeneratedPins = (newPins, role) => {
+  if (pins.value[role]) {
+    pins.value = {
+      ...pins.value,
+      [role]: [...newPins, ...pins.value[role]]
+    };
+  } else {
+    pins.value = {
+      ...pins.value,
+      [role]: newPins
+    };
+  }
+};
+
+const deleteAllExpiredPins = async () => {
+  loading.value.allExpired = true;
+  await pinGenerator.deletePins({
+    router, toast, toastLife: 3000, toastOnSuccess: true, toastOnFailure: true, body: { pins: [], expired: true }
+  });
+  loading.value.allExpired = false;
+}
+
+
+const deleteAllPins = async () => {
+  loading.value.all = true;
+  const { error } = await pinGenerator.deletePins({
+    router, toast, toastLife: 3000, toastOnSuccess: true, toastOnFailure: true, body: { pins: [] }
+  });
+  if (!error) {
+    pins.value = {}
+  }
+  loading.value.all = false;
+}
+
+const deleteAllRolePins = async (role) => {
+  loading.value[role] = true;
+  const pinRole = role.toUpperCase();
+  const { error } = await pinGenerator.deletePins({
+    router, toast, toastLife: 3000, toastOnSuccess: true, toastOnFailure: true, body: { role: pinRole, pins: [] }
+  });
+  if (!error) {
+    delete pins.value[role]
+  }
+  loading.value[role] = true;
 }
 
 const confirmDelete = () => {
@@ -47,7 +78,7 @@ const confirmDelete = () => {
       severity: 'danger'
     },
     accept: () => {
-      deletePins()
+      deleteAllPins()
     }
   })
 }
@@ -59,9 +90,10 @@ const confirmDelete = () => {
       <p class="font-semibold">PINs</p>
 
       <div class="flex items-center gap-2">
-        <Button label="Remove expired PINs" size="small" severity="secondary" icon="pi pi-clock" />
+        <Button @click="deleteAllExpiredPins" label="Remove expired PINs"
+          size="small" severity="secondary" icon="pi pi-clock" :loading="loading.allExpired" />
         <Button @click="confirmDelete" size="small" icon="pi pi-trash" label="Delete all PINs" severity="danger"
-          outlined :loading="isDeleting" />
+          outlined :loading="loading.all" />
       </div>
     </header>
 
@@ -70,17 +102,32 @@ const confirmDelete = () => {
         <Card>
           <template #title>PIN Generator</template>
           <template #content>
-            <VPinGenerator />
+            <VPinGenerator @generate-pin="addGeneratedPins" />
           </template>
         </Card>
       </div>
+      
 
       <section v-if="error" class="h-72 px-2 pb-5 md:px-5 grid w-full place-content-center">
         <ServerError :error reloadOnRetry />
       </section>
 
-      <section v-if="pins" class="h-full px-2 pb-5 md:px-5 grid gap-4">
-        ffdfdf dfddf fsf
+      <section v-else-if="pins" class="mt-4 h-full px-2 pb-5 md:px-5 grid gap-4">
+        <Accordion>
+          <AccordionPanel v-for="keyPins, key, index in pins" :key :value="index">
+              <AccordionHeader>
+                <p>{{ key[0].toUpperCase() + key.slice(1, key.length) }} PINs</p>
+              </AccordionHeader>
+              <AccordionContent>
+                <div class="flex justify-end">
+                  <Button @click="deleteAllRolePins(key)" :loading="loading[key]" size="small" label="Delete all" severity="danger" outlined class="ml-auto" />
+                </div>
+                  <div class="grid grid-cols-3 md:grid-cols-5">
+                    <p v-for="pin in keyPins" :key="pin._id">{{ pin.value }}</p>
+                  </div>
+              </AccordionContent>
+          </AccordionPanel>
+      </Accordion>
       </section>
     </div>
 

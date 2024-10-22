@@ -18,6 +18,11 @@ const adminRoutes = [
     }
   },
   {
+    path: "courses",
+    name: "admin-courses",
+    component: () => import("@/views/admin/CoursesView.vue"),
+  },
+  {
     path: "administrators",
     name: "admin-admins",
     component: () => import("@/views/admin/AdminsView.vue")

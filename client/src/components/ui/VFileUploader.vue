@@ -13,6 +13,7 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
   inputId: { type: String, default: "v-file-uploader" },
   uploadDisabled: { type: Boolean, default: false },
+  
 })
 
 const emit = defineEmits(['cancel', 'select', 'upload'])

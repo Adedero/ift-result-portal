@@ -10,15 +10,15 @@ const links = ref([
   {
     heading: "General",
     items: [
-      { id: 1, title: "Results", icon: "pi pi-book", name: "student-results", params: {} },
-      { id: 2, title: "Course Registration", icon: "pi pi-file-edit", name: "course-registration", params: {} },
+      { id: 1, title: "Results", icon: "pi pi-book", name: "student-results" },
+      { id: 2, title: "Course Registration", icon: "pi pi-file-edit", name: "course-registration" },
     ]
   },
   {
     heading: "Settings",
     items: [
-      { id: 1, title: "Biometrics", icon: "pi pi-eye", name: "student-biometrics", params: {} },
-      { id: 2, title: "Profile", icon: "pi pi-user", name: "student-profile", params: {} },
+      { id: 1, title: "Biometrics", icon: "pi pi-eye", name: "student-biometrics" },
+      { id: 2, title: "Profile", icon: "pi pi-user", name: "student-profile" },
     ]
   }
 ])

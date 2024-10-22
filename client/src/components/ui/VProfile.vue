@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import useUserStore from '../../stores/user.store';
 import useFetch from '../../composables/fetch/use-fetch';
 import { useRouter } from 'vue-router';
@@ -23,6 +23,12 @@ const toast = useToast();
 const userStore = useUserStore();
 
 const profile = ref({ ...props.user });
+
+const isFileSelected = ref(false);
+const cancelUpload = ref(false);
+const handleCancel = () => {
+  window.location.reload()
+}
 //Handle profile picture change
 const handleUpload = async (file) => {
   profile.value.changingImage = true;
@@ -38,6 +44,20 @@ const handleUpload = async (file) => {
     }
   )
   profile.value.changingImage = false;
+}
+//Remove image
+const removing = ref(false);
+const handleRemove = async () => {
+  removing.value = true;
+  await useFetch(
+    `${props.role}/remove-image/${profile.value._id}`,
+    { method: "PUT", router, toast, toastOnFailure: true },
+    () => {
+      profile.value.image = "";
+      userStore.setUser(profile.value._id, { image: "" });
+    }
+  )
+  removing.value = false;
 }
 
 const updatePersonalDetails = async () => {
@@ -81,17 +101,27 @@ const updateAccountDetails = async () => {
   <section class="w-full grid items-start gap-5 md:gap-2 md:grid-cols-3">
     <div class="flex flex-col items-center gap-4 justify-center md:col-span-1">
       <div class="rounded-full overflow-hidden w-40 h-40">
-        <VAvatar :user="profile" size="xlarge" class="w-40 h-40 rounded-full" />
+        <VAvatar :user="profile" size="xlarge" class="text-5xl w-40 h-40 rounded-full" />
       </div>
 
       <div class="text-center grid">
         <p class="text-sm font-medium text-slate-500 mb-1">Change profile picture</p>
-        <VFileUploader :loading="profile.changingImage" @upload="handleUpload" accept=".png,.jpg,.jpeg,.bmp,"
-          :max-file-size="2 * 1024 * 1024" />
-      </div>
+        <VFileUploader :loading="profile.changingImage"
+          @select="isFileSelected = true" @cancel="isFileSelected = false"
+          @upload="handleUpload" accept=".png,.jpg,.jpeg,.bmp,"
+          :max-file-size="2 * 1024 * 1024" :cancelUpload />
 
+          <div v-if="profile.image" class="mt-2">
+            <Button @click="handleRemove" severity="danger" :loading="removing" outlined label="Remove" />
+          </div>
+
+          <div v-if="isFileSelected" class="mt-2">
+            <Button @click="handleCancel" severity="danger" outlined label="Cancel" />
+          </div>
+      </div>
+      <Divider />
       <div>
-        <PasswordChanger role="student" :user="profile" />
+        <PasswordChanger :role :user="profile" />
       </div>
 
     </div>
@@ -103,8 +133,8 @@ const updateAccountDetails = async () => {
           <div :class="['grid gap-2', profile.role !== 'STUDENT' ? 'md:grid-cols-3' : 'md:grid-cols-2']">
             <Select v-if="profile.role !== 'STUDENT'" v-model="profile.title" :options="titles" placeholder="Title"
               fluid />
-            <InputText v-model="profile.firstName" placeholder="First Name" fluid />
-            <InputText v-model="profile.lastName" placeholder="Last Name" fluid />
+            <InputText v-model.trim="profile.firstName" placeholder="First Name" fluid />
+            <InputText v-model.trim="profile.lastName" placeholder="Last Name" fluid />
             <Select v-model="profile.sex" :options="['FEMALE', 'MALE']" placeholder="Sex" fluid />
             <Button label="save" icon="pi pi-check-circle" @click="updatePersonalDetails"
               :disabled="!profile.firstName || !profile.lastName || !profile.sex || profile.loading_1"
@@ -122,7 +152,9 @@ const updateAccountDetails = async () => {
             <Select v-if="profile.role === 'STUDENT'" v-model="profile.level"
               :options="[100, 200, 300, 400, 500, 600, 700]" placeholder="Level" fluid />
 
-            <InputText v-if="profile.role !== 'STUDENT'" v-model="profile.staffId" placeholder="Staff ID" disabled
+            <InputText v-if="profile.role !== 'STUDENT'" v-model.trim="profile.staffId"
+              placeholder="Staff ID"
+              :disabled="profile.role !== 'ADMIN'"
               fluid />
             <Select v-if="profile.role !== 'STUDENT'" v-model="profile.studentClass" :options="['', ...classes]"
               placeholder="Student Class" fluid />
@@ -137,8 +169,8 @@ const updateAccountDetails = async () => {
         <template #title>Account Details</template>
         <template #content>
           <div class="grid gap-2 md:grid-cols-2">
-            <InputText v-model="profile.email" placeholder="Email" class="md:col-span-2" fluid />
-            <InputText v-model="profile.username" placeholder="Username" fluid />
+            <InputText v-model.trim="profile.email" placeholder="Email" class="md:col-span-2" fluid />
+            <InputText v-model.trim="profile.username" placeholder="Username" fluid />
             <Button label="save" icon="pi pi-check-circle" @click="updateAccountDetails" :loading="profile.loading_3" />
           </div>
         </template>

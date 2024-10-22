@@ -35,10 +35,26 @@ const generatePin = async () => {
   );
   if (payload) {
     data.value = payload;
-    emit("generate-pin", payload.pins)
+    emit("generate-pin", payload.pins, selectedUser.value.role.toLowerCase())
     visible.value = true;
   };
   loading.value = false;
+}
+
+const deleting = ref(false);
+const deletePins = async () => {
+  if (!data.value || !data.value.pins) return;
+  deleting.value = true;
+  const { error } = await pinGenerator.deletePins({
+    router, toast, toastOnFailure: true, toastOnSuccess: true, body: { pins: data.value.pins }
+  });
+  if (error) {
+    deleting.value = false;
+    return
+  }
+  data.value = null;
+  deleting.value = false;
+  visible.value = false;
 }
 </script>
 
@@ -80,8 +96,7 @@ const generatePin = async () => {
           </ul>
           <div class="flex items-center gap-2 mt-4 justify-end">
             <Button label="Done" @click="visible = false" class="mr-auto" />
-            <Button @click="printPins" severity="secondary" label="Print" icon="pi pi-print" />
-            <Button severity="danger" label="Delete" icon="pi pi-trash" />
+            <Button @click="deletePins" :loading="deleting" severity="danger" outlined label="Delete" icon="pi pi-trash" />
           </div>
 
         </div>

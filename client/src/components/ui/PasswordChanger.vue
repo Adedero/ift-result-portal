@@ -62,19 +62,19 @@ const changePassword = async () => {
       <Button @click="open" label="Change password" icon="pi pi-lock" outlined />
     </slot>
 
-    <Dialog v-model:visible="visible" header="Change Password" class="max-w-96">
+    <Dialog v-model:visible="visible" header="Change Password" class="w-80 max-w-96">
       <Stepper value="1" linear>
         <StepList>
-          <Step value="1">1</Step>
-          <Step value="2">2</Step>
-          <Step value="3">3</Step>
+          <Step value="1"></Step>
+          <Step value="2"></Step>
+          <Step value="3"></Step>
         </StepList>
 
         <StepPanels>
           <StepPanel v-slot="{ activateCallback }" value="1">
             <div class="grid gap-1">
               <p class="text-slate-500 text-sm font-medium">Enter your old password</p>
-              <Password v-model="passwords.oldPassword" :feedback="false" toggle-mask />
+              <InputText v-model.trim="passwords.oldPassword" fluid />
               <small v-if="message" class="text-red-500 font-medium">{{ message }}</small>
             </div>
 
@@ -87,7 +87,7 @@ const changePassword = async () => {
           <StepPanel v-slot="{ activateCallback }" value="2">
             <div class="grid gap-1">
               <p class="text-slate-500 text-sm font-medium">Enter your new password</p>
-              <Password v-model="passwords.newPassword" toggle-mask />
+              <Password v-model.trim="passwords.newPassword" toggle-mask fluid />
               <small>Password must be at least 8 characters</small>
             </div>
 
@@ -102,7 +102,7 @@ const changePassword = async () => {
           <StepPanel v-slot="{ activateCallback }" value="3">
             <div class="grid gap-1">
               <p class="text-slate-500 text-sm font-medium">Confirm your new password</p>
-              <Password v-model="passwords.confirmPassword" :feedback="false" toggle-mask />
+              <Password v-model.trim="passwords.confirmPassword" :feedback="false" toggle-mask fluid />
               <small v-show="passwords.confirmPassword && (passwords.confirmPassword !== passwords.newPassword)"
                 class="text-red-500 font-medium">
                 Passwords do not match!

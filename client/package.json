@@ -12,7 +12,7 @@
     "@primevue/themes": "^4.1.0",
     "@simplewebauthn/browser": "^11.0.0",
     "@tato30/vue-pdf": "^1.11.1",
-    "face-api.js": "^0.20.0",
+    "face-api.js": "^0.22.2",
     "passport-jwt": "^4.0.1",
     "pdf-viewer-vue": "^0.2.7",
     "pinia": "^2.2.4",

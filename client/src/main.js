@@ -8,6 +8,9 @@ import { createPinia } from "pinia";
 import { MyPreset, primevueOptions } from "./config/primevue.config";
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
+import KeyFilter from 'primevue/keyfilter';
+
+
 
 
 const pinia = createPinia();
@@ -23,5 +26,7 @@ app.use(PrimeVue, {
 });
 app.use(ToastService);
 app.use(ConfirmationService);
+app.directive('keyfilter', KeyFilter);
+
 
 app.mount("#app");

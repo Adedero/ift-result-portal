@@ -133,7 +133,7 @@ onUnmounted(() => {
         <label for="reg-number" class="text-sm text-slate-600 font-medium">Reg. Number
           <span class="text-red-500">*</span>
         </label>
-        <InputNumber v-model.trim="user.regNumber" input-id="reg-number" :useGrouping="false" fluid />
+        <InputText v-model.trim="user.regNumber" id="reg-number" fluid v-keyfilter.int />
       </div>
 
       <div v-if="user.role !== 'STUDENT'" class="grid">
@@ -186,7 +186,7 @@ onUnmounted(() => {
     <div class="mt-4 grid md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8">
       <div class="grid relative lg:col-span-2">
         <label for="password" class="text-sm text-slate-600 font-medium">Password</label>
-        <Password @input="checkPasswordLength" v-model.trim="password" input-id="password" fluid />
+        <InputText @input="checkPasswordLength" v-model.trim="password" id="password" fluid />
         <small v-show="isPasswordTooShort" class="bg-white p-0.5 rounded-md md:top-16 md:absolute text-red-500">
           Password must be at least 8 characters.</small>
       </div>

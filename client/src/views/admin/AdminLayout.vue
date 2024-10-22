@@ -10,24 +10,25 @@ const links = ref([
   {
     heading: "General",
     items: [
-      { id: 1, title: "Dashboard", icon: "pi pi-home", name: "admin-dashboard", params: {} },
-      { id: 2, title: "Results", icon: "pi pi-book", name: "admin-results", params: {} }
+      { id: 1, title: "Dashboard", icon: "pi pi-home", name: "admin-dashboard" },
+      { id: 2, title: "Results", icon: "pi pi-star", name: "admin-results" },
+      { id: 3, title: "Courses", icon: "pi pi-book", name: "admin-courses" }
     ]
   },
   {
     heading: "Users",
     items: [
-      { id: 1, title: "Admins", icon: "pi pi-shield", name: "admin-admins", params: {} },
-      { id: 2, title: "Staffs", icon: "pi pi-briefcase", name: "admin-staffs", params: {} },
-      { id: 3, title: "Students", icon: "pi pi-users", name: "admin-students", params: {} },
+      { id: 1, title: "Admins", icon: "pi pi-shield", name: "admin-admins" },
+      { id: 2, title: "Staffs", icon: "pi pi-briefcase", name: "admin-staffs" },
+      { id: 3, title: "Students", icon: "pi pi-users", name: "admin-students" },
     ]
   },
   {
     heading: "Settings",
     items: [
-      { id: 1, title: "PINs", icon: "pi pi-key", name: "admin-pins", params: {} },
-      { id: 2, title: "Biometrics", icon: "pi pi-eye", name: "admin-biometrics", params: {} },
-      { id: 3, title: "Profile", icon: "pi pi-user", name: "admin-profile", params: {} },
+      { id: 1, title: "PINs", icon: "pi pi-key", name: "admin-pins" },
+      { id: 2, title: "Biometrics", icon: "pi pi-eye", name: "admin-biometrics" },
+      { id: 3, title: "Profile", icon: "pi pi-user", name: "admin-profile" },
     ]
   }
 ])

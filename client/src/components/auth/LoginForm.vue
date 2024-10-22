@@ -53,13 +53,13 @@ const login = async () => {
   <div class="grid gap-5">
     <div>
       <label for="id">ID <small class="text-slate-500 md:hidden">Username, email, staff ID, or Reg. Number</small></label>
-      <InputText v-model="user.id" type="text" id="id" fluid placeholder="Username, Email, StaffId or Reg. Number" />
+      <InputText v-model.trim="user.id" type="text" id="id" fluid placeholder="Username, Email, StaffId or Reg. Number" />
       <small></small>
     </div>
 
     <div>
       <label for="password">Password</label>
-      <Password v-model="user.password" input-id="password" fluid :feedback="false" toggle-mask placeholder="Password" />
+      <Password v-model.trim="user.password" input-id="password" fluid :feedback="false" toggle-mask placeholder="Password" />
       <small></small>
     </div>
 

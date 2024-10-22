@@ -35,6 +35,10 @@ const selectedCourses = computed(() => {
 const loading = ref(false);
 const err = ref(null);
 const handleSubmit = async () => {
+  if (!selectedCourses.value.length > 0) {
+    toast.add({ summary: "No courses selected!", life: 5000 })
+    return;
+  }
   courseReg.value.courses = selectedCourses.value;
   loading.value = true;
   error.value = null;
@@ -56,7 +60,8 @@ const handleSubmit = async () => {
       <div class="flex items-center justify-between gap-3 mb-2">
         <p class="font-semibold">Register Courses</p>
 
-        <Button @click="handleSubmit" label="Register" icon="pi pi-check" :loading />
+        <Button @click="handleSubmit" label="Register" icon="pi pi-check" :loading
+          :disabled="!courseReg.session || !courseReg.semester || !selectedCourses.length > 0 || loading" />
       </div>
       <div class="flex justify-between items-center w-full flex-wrap">
         <p>Selected Courses: <span class="font-semibold"> {{ selectedCourses.length }}</span></p>
@@ -79,7 +84,7 @@ const handleSubmit = async () => {
 
     <div class="max-h-[calc(100%-4rem)] overflow-y-auto">
       <section v-if="error" class="h-72 px-2 pb-5 md:px-5 grid w-full place-content-center">
-        <ServerError reloadOnRetry />
+        <ServerError :error reloadOnRetry />
       </section>
 
       <section v-else-if="data" class="h-full px-2 pb-5 md:px-5 grid gap-4">
