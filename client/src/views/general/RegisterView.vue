@@ -1,6 +1,3 @@
-<script setup>
-</script>
-
 <template>
   <section class="pt-4">
     <h1 class="font-semibold text-4xl">Register</h1>
