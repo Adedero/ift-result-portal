@@ -11,7 +11,7 @@ const toast = useToast();
 
 const { data: user, error } = await useFetch(
   `auth/get-user-auth-detail/${route.params.userId}`,
-  { router, toast, useBaseUrl: true }
+  { router, toast, useBaseUrl: true, sendToken: false }
 )
 
 const loading = ref(false);
@@ -32,26 +32,28 @@ const resetPassword = async () => {
 
 <template>
   <div>
-    <div v-if="error">
+    <h1 class="font-semibold text-4xl">Reset Password</h1>
+    <div v-if="error" class="mt-5">
       <ServerError :error reloadOnRetry />
     </div>
 
-    <div v-else-if="user">
-      <p>Enter the OTP that has been sent to your email: <span class="font-semibold">maskEmail(user.email)</span> </p>
+    <div v-else-if="user" class="mt-2">
+      <p>Enter the OTP that has been sent to your email: <span class="font-semibold">{{ maskEmail(user.email) }}</span>
+      </p>
 
-      <Stepper value="1" linear>
+      <Stepper value="1" linear class="mt-5">
         <StepList>
           <Step value="1"></Step>
           <Step value="2"></Step>
           <Step value="3"></Step>
         </StepList>
         <StepPanels>
-          <StepPanel v-slot="{ activateCallback }" value="1">
+          <StepPanel v-slot="{ activateCallback }" value="1" class="bg-transparent">
             <div>
               <InputOtp v-model="otp" integerOnly mask :length="6" />
             </div>
             <div class="flex pt-6 justify-end">
-              <Button label="Next" icon="pi pi-arrow-right" :disabled="!otp" @click="activateCallback('2')" />
+              <Button label="Next" icon="pi pi-arrow-right" :disabled="!otp || !otp.length !== 6" @click="activateCallback('2')" />
             </div>
           </StepPanel>
 
@@ -64,7 +66,8 @@ const resetPassword = async () => {
             </div>
             <div class="flex pt-6 justify-between">
               <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="activateCallback('1')" />
-              <Button label="Next" icon="pi pi-arrow-right" iconPos="right" :disabled="!passwords.newPassword.length > 7" @click="activateCallback('3')" />
+              <Button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                :disabled="!passwords.newPassword.length > 7" @click="activateCallback('3')" />
             </div>
           </StepPanel>
 
