@@ -80,7 +80,7 @@ router.beforeEach((to, from, next) => {
       next("/")
     }
     const user = JSON.parse(localStorage.getItem(`user-${userId}`));
-    if (!user || !user.token || !user.role.toLowerCase() === to.meta.role.toLowerCase()) {
+    if (!user || !user.token || user.role !== to.meta.role) {
       next("/");
     } else {
       next()
