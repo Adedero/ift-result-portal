@@ -48,8 +48,47 @@ const router = createRouter({
           }
         }
       ]
+    },
+    {
+      path: '/404',
+      name: '404',
+      component: () => import('@/views/errors/Error404.vue')
+    },
+    {
+      path: '/403',
+      name: '403',
+      component: () => import('@/views/errors/Error403.vue')
+    },
+    {
+      path: '/500',
+      name: '500',
+      component: () => import('@/views/errors/Error500.vue')
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      beforeEnter: (to, from, next) => { next('/404') }
     }
   ],
+});
+
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    const userId = to.params.userId;
+    if (!userId) {
+      next("/")
+    }
+    const user = JSON.parse(localStorage.getItem(`user-${userId}`));
+    if (!user || !user.token || !user.role.toLowerCase() === record.meta.role.toLowerCase()) {
+      next("/");
+    } else {
+      next()
+    }
+  } else {
+    next();
+  }
 })
+
 
 export default router;
