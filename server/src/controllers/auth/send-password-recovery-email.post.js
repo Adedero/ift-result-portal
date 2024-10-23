@@ -19,7 +19,7 @@ module.exports = {
     if (!user) {
       return res.status(400).json({
         info: "Not found",
-        message: "No account with this email found. Check the email and try again, or visit the admin for a password reset."
+        message: "No account with this email found. Check the email and try again, or contact the admin for a password reset."
       })
     }
 
