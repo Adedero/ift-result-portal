@@ -14,6 +14,7 @@ const email = ref("");
 
 const submit = async () => {
   loading.value = true;
+  error.value = null;
   const { error: err } = await useFetch(
     "auth/send-password-recovery-email",
     { router, toast, method: "POST", body: { email: email.value }, useBaseUrl: true, sendToken: false },

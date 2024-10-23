@@ -3,7 +3,6 @@ module.exports = (mongoose) => {
     value: {
       type: Number,
       required: true,
-      unique: true
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

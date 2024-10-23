@@ -23,32 +23,37 @@ module.exports = {
       })
     }
 
-    const expiration = "1 hour"
+    const expiration = "1 hour";
 
-    let otp = await db.Otp.findOne({ user: user.id });
+    let otp = await db.Otp.findOne({ user: user._id });
     if (!otp) {
-      otp = await db.Otp.create({
+      const newOtp = {
         user: user._id,
         value: generateRandomPin(6, 'numeric'),
-        validity: getPinExpiry("1 hour")
-      });
+        validity: getPinExpiry("1 hour"),
+        isNew: true
+      }
+      otp = newOtp
     }
 
     if (isPinExpired(otp.validity)) {
-      const [ newOtp ] = await Promise.all([
-        db.Otp.create({
-          user: user._id,
-          value: generateRandomPin(6, 'numeric'),
-          validity: getPinExpiry(expiration)
-        }),
-        db.Otp.deleteOne({ _id: otp._id })
-      ]);
-      otp = newOtp;
+      if (otp._id) {
+        await db.Otp.deleteOne({ _id: otp._id })
+      }
+
+      const newOtp = {
+        user: user._id,
+        value: generateRandomPin(6, 'numeric'),
+        validity: getPinExpiry("1 hour"),
+        isNew: true
+      }
+
+      otp = newOtp
     }
 
     const text = `Your secure OTP is ${otp.value}. Note that this password expires in ${expiration}`;
     
-    const [info, error] = await sendTextEmail(user.email, "IFT Result Portal Password Recovery", text);
+    const [_, error] = await sendTextEmail(user.email, "IFT Result Portal Password Recovery", text);
     if (error) {
       return res.status(500).json({
         success: false,
@@ -56,6 +61,11 @@ module.exports = {
         message: 'Could not send OTP to email. Please, check your network connection and try again.'
       });
     }
+
+    if (otp.isNew) {
+      await db.Otp.create(otp)
+    }
+
 
     return res.status(200).json({
       success: true,

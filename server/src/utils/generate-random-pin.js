@@ -11,11 +11,17 @@ function generateRandomPin(length = 10, type = 'numeric') {
   };
 
   const charSet = charSets[type.toLowerCase()] || charSets['numeric'];
-  const randomBytes = crypto.randomBytes(length);
+  const charSetLength = charSet.length;
   let pin = '';
 
-  for (let i = 0; i < length; i++) {
-    pin += charSet[randomBytes[i] % charSet.length]
+  while (pin.length < length) {
+    const randomBytes = crypto.randomBytes(1); // Generate one byte at a time
+    const randomValue = randomBytes[0];
+
+    // Only use values within the range of the charset
+    if (randomValue < charSetLength) {
+      pin += charSet[randomValue];
+    }
   }
 
   return pin;
