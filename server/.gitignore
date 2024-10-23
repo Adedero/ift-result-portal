@@ -1,0 +1,5 @@
+node_modules
+src/logs
+.env
+route.rest
+src/config/csc-portal-4d2d8-firebase-adminsdk-c85wv-4356db7bb1.json
