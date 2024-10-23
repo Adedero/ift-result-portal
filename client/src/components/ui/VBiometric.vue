@@ -5,7 +5,6 @@ import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
 import biometrics from "@/assets/biometrics.svg";
 import useUserStore from '../../stores/user.store';
-import FaceIdLoader from './FaceIdLoader.vue';
 import { useConfirm } from 'primevue/useconfirm';
 
 const FaceDetector = defineAsyncComponent({

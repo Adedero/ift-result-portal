@@ -4,8 +4,6 @@ import useFetch from "../../composables/fetch/use-fetch";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import useUserStore from "../../stores/user.store";
-import FaceIdLoader from '../ui/FaceIdLoader.vue';
-
 
 const FaceDetector = defineAsyncComponent({
   loader: () => import("./FaceDetector.vue"),
