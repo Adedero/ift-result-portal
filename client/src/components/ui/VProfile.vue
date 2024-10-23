@@ -40,7 +40,8 @@ const handleUpload = async (file) => {
     (payload) => {
       profile.value.image = payload.image;
       userStore.setUser(profile.value._id, { image: payload.image });
-      window.location.reload();
+      isFileSelected.value = false;
+      //window.location.reload();
     }
   )
   profile.value.changingImage = false;
@@ -111,7 +112,7 @@ const updateAccountDetails = async () => {
           @upload="handleUpload" accept=".png,.jpg,.jpeg,.bmp,"
           :max-file-size="2 * 1024 * 1024" :cancelUpload />
 
-          <div v-if="profile.image" class="mt-2">
+          <div v-if="profile.image && !isFileSelected" class="mt-2">
             <Button @click="handleRemove" severity="danger" :loading="removing" outlined label="Remove" />
           </div>
 
