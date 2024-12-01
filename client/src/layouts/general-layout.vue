@@ -1,6 +1,6 @@
 <script setup>
 import bg_image from "@/assets/bg-image-2.png";
-import futo_logo from "@/assets/futo-logo.svg";
+import futo_logo from "@/assets/futo-logo.png";
 </script>
 <template>
   <main class="h-dvh w-full grid md:flex md:items-center md:justify-center">

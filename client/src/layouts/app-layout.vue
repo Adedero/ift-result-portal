@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import useUserStore from "@/stores/user.store";
-import futo_logo from "@/assets/futo-logo.svg";
+import futo_logo from "@/assets/futo-logo.png";
 
 const userStore = useUserStore();
 const isNavbarOpen = ref(localStorage.getItem("isNavbarOpen") === "true");

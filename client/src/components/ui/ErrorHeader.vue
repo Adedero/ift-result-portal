@@ -1,5 +1,5 @@
 <script setup>
-import futo_logo from "@/assets/futo-logo.svg";
+import futo_logo from "@/assets/futo-logo.png";
 </script>
 
 <template>
