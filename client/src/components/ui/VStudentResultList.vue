@@ -52,8 +52,8 @@ const verifyFaceId = (verified) => {
     });
     return
   }
-  if (selectedResult) {
-    router.push({ name: 'student-result', params: { resultId: selectedResult._id } })
+  if (selectedResult.value) {
+    router.push({ name: 'student-result', params: { resultId: selectedResult.value._id } })
   }
 }
 </script>
@@ -133,7 +133,7 @@ const verifyFaceId = (verified) => {
       <p class="text-slate-500 text-lg text-center font-medium">No Results</p>
     </div>
 
-    <Dialog v-model:visible="visible" modal header="Verify Face ID">
+    <Dialog v-model:visible="visible" modal header="Verify Face ID" class="w-80 md:w-96">
       <Suspense>
         <template #default>
           <FaceDetector v-if="visible" :storedFaceDescriptor="userStore.user.faceDescriptor" action="verify" @verify="verifyFaceId" />
