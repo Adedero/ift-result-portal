@@ -116,7 +116,11 @@ async function getFaceDescriptor() {
     canvas.style.left = 0;
     canvas.style.top = 0;
     faceapi.matchDimensions(canvas, displaySize.value);
-    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.translate(w, 0);
+    ctx.scale(-1, 1);
+    //canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     videoContainer.value.append(canvas);
 
     const detections = await faceapi.detectSingleFace(video.value, new faceapi.SsdMobilenetv1Options())
@@ -191,8 +195,8 @@ onUnmounted(() => {
 
 
 <template>
-  <div class="grid gap-4">
-    <div v-if="error" class="mt-2 gap-4 flex items-center justify-center max-w-[400px]">
+  <div class="flex flex-col items-center gap-4 w-full">
+    <div v-if="error" class="mt-2 gap-4 flex items-center justify-center w-full">
       <Message>
         <div class="flex flex-col items-center justify-center gap-1">
           <p>{{ error.message }}</p>
@@ -201,7 +205,7 @@ onUnmounted(() => {
       </Message>
     </div>
 
-    <div id="video-container" ref="videoContainer" class="relative overflow-hidden h-[400px] w-[400px]">
+    <div id="video-container" ref="videoContainer" class="relative overflow-hidden h-[300px] w-[300px] md:h-[400px] md:w-[400px]">
       <video id="faceid-video" ref="video" autoplay playsinline muted width="400" height="400"></video>
     </div>
   </div>
@@ -213,6 +217,8 @@ onUnmounted(() => {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
   }
   
   canvas {

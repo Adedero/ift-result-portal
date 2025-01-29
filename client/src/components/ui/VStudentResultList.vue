@@ -133,7 +133,7 @@ const verifyFaceId = (verified) => {
       <p class="text-slate-500 text-lg text-center font-medium">No Results</p>
     </div>
 
-    <Dialog v-model:visible="visible" modal header="Verify Face ID" class="w-80 md:w-96">
+    <Dialog v-model:visible="visible" modal header="Verify Face ID" class="w-[350px] md:w-auto">
       <Suspense>
         <template #default>
           <FaceDetector v-if="visible" :storedFaceDescriptor="userStore.user.faceDescriptor" action="verify" @verify="verifyFaceId" />

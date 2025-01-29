@@ -55,7 +55,7 @@ const openPasskeyLogin = () => {
         </template>
       </Button>
 
-      <Dialog v-model:visible="visible" header="Face ID Login" class="w-80 md:w-96">
+      <Dialog v-model:visible="visible" header="Face ID Login" class="w-[350px] md:w-auto">
         <Suspense>
           <template #default>
             <FaceidLogin @done="visible = false" v-if="visible" />
