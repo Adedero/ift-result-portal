@@ -88,8 +88,8 @@ const confirmDelete = () => {
             icon="pi pi-trash" outlined :loading="isDeleting" />
         </div>
       </header>
-      <div class="h-[calc(100%-4rem)] w-full overflow-auto flex flex-col items-center gap-4">
-        <div v-for="page in pages" class="w-full md:w-fit">
+      <div class="h-[calc(100%-4rem)] w-full  overflow-auto flex flex-col items-center gap-4">
+        <div v-for="page in pages" class="min-w-0 w-full md:w-fit">
           <VuePDF :page :pdf="pdf" :scale>
             <div class="h-96 w-full flex items-center justify-center">
               <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent"

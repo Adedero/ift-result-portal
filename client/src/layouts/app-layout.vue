@@ -17,7 +17,7 @@ const toggleNavbar = () => setIsNavbarOpen(!isNavbarOpen.value);
 
 <template>
   <section class="w-full h-dvh lg:flex lg:items-center">
-    <nav class="nav" :class="{ 'open': isNavbarOpen }">
+    <nav class="nav flex-shrink-0" :class="{ 'open': isNavbarOpen }">
       <slot name="navbar" :closeNavbar></slot>
     </nav>
     <div @click="closeNavbar" class="overlay" :class="{ 'open': isNavbarOpen }"></div>
@@ -43,7 +43,7 @@ const toggleNavbar = () => setIsNavbarOpen(!isNavbarOpen.value);
         </div>
       </header>
 
-      <section class="h-[calc(100dvh-4rem)] w-full overflow-y-auto">
+      <section class="h-[calc(100dvh-4rem)] min-w-0 w-full overflow-y-auto">
         <slot name="content"></slot>
       </section>
     </section>
@@ -64,6 +64,6 @@ const toggleNavbar = () => setIsNavbarOpen(!isNavbarOpen.value);
 }
 
 .nav.open {
-  @apply w-[min(80dvw,20rem)] lg:w-[22rem]
+  @apply w-[min(85dvw,17rem)] lg:w-[17rem]
 }
 </style>

@@ -62,7 +62,7 @@ const filteredResults = computed(() => {
       <section v-else-if="data" class="h-full px-2 pb-5 md:px-5 grid gap-4">
         <div v-for="(resultsArray, key) in filteredResults" :key="key" class="pt-5">
           <h1 class="font-semibold text-lg">{{ key }}</h1>
-          <VResultList :display :results="resultsArray" :routeName />
+          <VStudentResultList :display :results="resultsArray" :routeName />
           <Divider />
         </div>
 
