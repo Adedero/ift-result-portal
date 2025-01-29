@@ -1,9 +1,21 @@
 <script setup>
-import { ref } from "vue";
+import { defineAsyncComponent, ref } from 'vue';
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import useFileUpload from "@/composables/use-file-upload";
 import sessions from '@/data/sessions';
+import useUserStore from '../../stores/user.store';
+
+const FaceDetector = defineAsyncComponent({
+  loader: () => import('../biometrics/FaceDetector.vue')
+})
+
+const userStore = useUserStore()
+const router = useRouter();
+const toast = useToast();
+const error = ref(null);
+const loading = ref(false);
+const result = ref({});
 
 const emit = defineEmits(["upload"]);
 const props = defineProps({
@@ -19,13 +31,34 @@ const props = defineProps({
 })
 
 const visible = ref(false);
-const open = () => visible.value = true;
+const visible_2 = ref(false)
 
-const router = useRouter();
-const toast = useToast();
-const error = ref(null);
-const loading = ref(false);
-const result = ref({});
+const open = () => {
+  if (!userStore.user.faceDescriptor || Object.keys(userStore.user.faceDescriptor).length === 0) {
+    toast.add({
+      severity: 'error',
+      summary: 'Verification Required',
+      detail: 'You must set up your face ID upload results.',
+      life: 5000
+    });
+    return;
+  }
+  visible_2.value = true
+}
+
+const verifyFaceId = (verified) => {
+  visible_2.value = false;
+  if (!verified) {
+    toast.add({
+      severity: "warn",
+      summary: "Not a match!",
+      detail: "Face ID verification failed. Register a new face ID and try again, or contact the admin office",
+      life: 6000
+    });
+    return
+  }
+  visible.value = true
+}
 
 const handleUpload = async (files) => {
   result.value.courseCode = result.value.course.code;
@@ -39,8 +72,8 @@ const handleUpload = async (files) => {
   }
   loading.value = false;
   error.value = err.value;
-
 }
+
 </script>
 
 <template>
@@ -48,6 +81,19 @@ const handleUpload = async (files) => {
     <slot name="cta-button" open>
       <Button @click="open" label="Upload result" icon="pi pi-plus" size="small" />
     </slot>
+
+    <Dialog v-model:visible="visible_2" modal header="Verify Face ID" class="w-[350px] md:w-auto">
+      <Suspense>
+        <template #default>
+          <FaceDetector v-if="visible_2" :storedFaceDescriptor="userStore.user.faceDescriptor" action="verify" @verify="verifyFaceId" />
+        </template>
+        <template #fallback>
+          <div>
+            <FaceIdLoader />
+          </div>
+        </template>
+      </Suspense>
+    </Dialog>
 
     <Dialog v-model:visible="visible" modal header="Upload Result">
       <div class="grid gap-3 md:w-80">

@@ -1,5 +1,5 @@
 <script setup>
-import { defineAsyncComponent, onMounted, ref } from 'vue';
+import { defineAsyncComponent, ref } from 'vue';
 import { useLocaleDate } from "@/composables/use-formats"
 import useUserStore from '../../stores/user.store';
 import { useToast } from 'primevue/usetoast';
