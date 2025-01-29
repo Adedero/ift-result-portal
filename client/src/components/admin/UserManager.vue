@@ -239,7 +239,7 @@ onMounted(async () => {
       </section>
 
       <section v-else-if="users" class="h-full px-2 pb-5 md:px-5 grid gap-4">
-        <Dialog v-model:visible="isUpdating" @hide="onHide" modal
+        <Dialog v-model:visible="isUpdating" @hide="onHide" modal class="w-80 md:w-96"
           :header="`Edit ${userToUpdate ? userToUpdate.firstName + ' ' + userToUpdate.lastName : 'User'}`">
           <UpdateUser :updated-user="userToUpdate" @update="updateEditedUser" />
         </Dialog>

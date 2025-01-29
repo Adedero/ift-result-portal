@@ -141,7 +141,7 @@ const confirmDelete = () => {
         </Card>
     </div>
 
-    <Dialog v-model:visible="visible" modal header="Register Face ID">
+    <Dialog v-model:visible="visible" modal header="Register Face ID" class="w-80 md:w-96">
       <Suspense>
         <template #default>
           <FaceDetector v-if="visible" action="capture" @capture="registerFaceId" />
