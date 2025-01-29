@@ -118,7 +118,7 @@ async function getFaceDescriptor() {
     faceapi.matchDimensions(canvas, displaySize.value);
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.translate(w, 0);
+    ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     //canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     videoContainer.value.append(canvas);
